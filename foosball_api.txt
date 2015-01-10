@@ -1,0 +1,57 @@
+API
+
+Outline of Verbs
+-----------------
+GET -> Retrieves a resource. Response codes: 200, 404
+POST -> Creates a new resource. May return resource URI in LOCATION header. Response codes: 201, 404
+PUT -> Modifies a resource. Response codes: 200, 404
+DELETE -> Deletes a resource. Response codes: 200, 404
+
+Game
+------
+GET
+	/api/games/{id} -> entire game JSON
+	/api/games/{begin_start}{end_start}{begin_end}{end_end} -> array of game JSON
+POST
+	/api/game {game_json}
+PUT
+	/api/game {game_json}
+DELETE
+	/api/game/{id} -> Deletes game and all associated objects (Players, Scores, Teams)
+
+Player
+------
+GET
+	/api/games/{id}/players -> Array of players
+	/api/games/{id}/players/{id} -> Object of player
+POST
+	/api/games/{id}/players -> Takes array of players
+	/api/games/{id}/players/{id} -> Takes object
+PUT
+	/api/games/{id}/players -> Takes array of players
+	/api/games/{id}/players/{id} -> Takes object
+DELETE
+	/api/games/{id}/players -> Deletes all players
+	/api/games/{id}/players/{id} -> Deletes single player
+
+Score
+------
+GET
+	/api/games/{id}/scores -> Array of scores
+	/api/games/{id}/scores/{id} -> Object of score
+POST
+	/api/games/{id}/scores -> Takes array of scores
+	/api/games/{id}/scores/{id} -> Takes object
+PUT
+	/api/games/{id}/scores -> Takes array of scores
+	/api/games/{id}/scores/{id} -> Takes object
+DELETE
+	/api/games/{id}/scores -> Deletes all scores
+	/api/games/{id}/scores/{id} -> Deletes single score
+
+Team
+------
+GET
+POST
+PUT
+DELETE
