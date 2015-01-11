@@ -145,22 +145,42 @@ def get_teams(game_id):
     return jsonify( teams=results )
 
 # Create a game
-@app.route('/games', methods=['POST'])
+@app.route('/game', methods=['POST'])
 def create_game():
     # Game is sent in as JSON
     g_json = request.json
     
     g = Game()
 
-    if g_json.start == None:
+    if 'start' not in g_json:
         g.start = datetime.now()
     else:
         try:
-            g.start = datetime.strptime(g_json.start, '%m/%d/%Y %H:%M:%S')
+            g.start = datetime.strptime(g_json['start'], '%m/%d/%Y %H:%M:%S')
         except ValueError:
             abort(404)
 
+    db.session.add(g)
+    db.session.commit()
 
+    # Create teams 
+    if 'teams' in g_json:
+        for team in g_json['teams']:
+            t = Team()
+            t.game_id = g.id
+            if 'players' in team:
+                for player in team['players']:
+                    p = Player()
+                    p.position = player['position']
+                    p.user_id = player['user_id']
+                    p.game_id = t.game_id 
+                    t.players.append(p)
+            g.teams.append(t)
+
+    db.session.commit()
+
+    return make_response(('', 201, \
+        { 'location': 'games/%s' % (g.id) }))
 
 
 
