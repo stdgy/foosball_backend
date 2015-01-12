@@ -6,6 +6,9 @@
 		<input type="button" id="score" value="Score" />
 		<input type="button" id="test" value="Test Me" />
 		<input type="button" id="new-game" value="Create Game" />
+		<br>
+		<input type="text" placeholder="game id" id="delete-id" />
+		<input type="button" id="delete-button" value="Delete Game" />
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 		<script>
 			$(document).ready(function(){
@@ -109,7 +112,28 @@
 						}
 					});
 				});
+
+				$("#delete-button").on("click", function(){
+					var del_id = $("#delete-id").val();
+
+					if (del_id === ""){
+						return false;
+					}
+
+					$.ajax({
+						url: "http://127.0.0.1:5000/game/" + del_id,
+						type: "DELETE",
+						success: function(){
+
+						}, 
+						error: function(){
+
+						}
+					})
+				});
 			});
+
+			
 		</script>
 	</body>
 </html>

@@ -158,7 +158,7 @@ def create_game():
         try:
             g.start = datetime.strptime(g_json['start'], '%m/%d/%Y %H:%M:%S')
         except ValueError:
-            abort(404)
+            return abort(404)
 
     db.session.add(g)
     db.session.commit()
@@ -182,6 +182,21 @@ def create_game():
     return make_response(('', 201, \
         { 'location': 'games/%s' % (g.id) }))
 
+# Delete a game
+@app.route('/game/<int:game_id>', methods=['DELETE'])
+def delete_game(game_id):
+    games = db.session.query(Game)\
+            .filter(Game.id == game_id)
+
+    if games.count() != 1:
+        return abort(404)
+
+    g = games.first()
+
+    db.session.delete(g)
+    db.session.commit()
+
+    return make_response(('', 200, None))
 
 
 @app.route("/static/<path:path>", methods=['GET'])
