@@ -25,7 +25,8 @@ class User(Base):
 			'name': self.name,
 			'first_name': self.first_name,
 			'last_name': self.last_name,
-			'birthday': self.birthday,
+			'birthday': self.birthday.strftime('%m/%d/%Y') if self.birthday is not None\
+					else '',
 			'email': self.email
 		}
 

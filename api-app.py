@@ -26,6 +26,51 @@ def get_users():
     users = db.session.query(User)
     return jsonify( users=[user.serialize for user in users])
 
+@app.route('/user', methods=['POST'])
+def create_user():
+    u_json = request.json 
+    user = User()
+
+    if 'name' in u_json:
+        user.name = u_json['name']
+    else:
+        return abort(400)
+    
+    if 'first_name' in u_json:
+        user.first_name = u_json['first_name']
+
+    if 'last_name' in u_json:
+        user.last_name = u_json['last_name']
+
+    if 'birthday' in u_json:
+        try:
+            user.birthday = datetime.strptime(u_json['birthday'],\
+                                '%m/%d/%Y')
+        except ValueError:
+            return abort(400)
+
+    if 'email' in u_json:
+        user.email = u_json['email']
+
+    db.session.add(user)
+    db.session.commit()
+
+    return make_response('', '201', { 'location': '/users/%s' % (user.id) })
+
+@app.route('/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    users = db.session.query(User)\
+            .filter(User.id == user_id)
+
+    if users.count() != 1:
+        return abort(404)
+
+    user = users.first()
+    db.session.delete(user)
+    db.session.commit()
+
+    return make_response(('', 200, ''))
+
 @app.route('/games/<int:game_id>', methods=['GET'])
 def get_game(game_id):
     # check count
