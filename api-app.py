@@ -19,6 +19,17 @@ db = SQLAlchemy(app)
 @app.route('/games', methods=['GET'])
 def get_games():
     games = db.session.query(Game)
+
+    # Check whether any filters were passed in.
+    # Allowed filters:
+    #    User
+    #    Time Range - start, end
+    #    
+
+    if 'user_id' in request.values:
+        uid = request.values['user_id']
+        games = games.filter(Game.players.any(user_id=uid))
+
     return jsonify( games=[game.serialize for game in games])
 
 @app.route('/users', methods=['GET'])
@@ -64,6 +75,14 @@ def delete_user(user_id):
 
     if users.count() != 1:
         return abort(404)
+
+    # Check if the user is in any games. If so, don't allow delete
+    player_count = db.session.query(Player)\
+                .filter(Player.user_id == user_id)\
+                .count()
+
+    if player_count > 0:
+        return abort(405)
 
     user = users.first()
     db.session.delete(user)
