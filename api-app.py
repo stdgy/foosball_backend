@@ -22,14 +22,40 @@ def get_games():
 
     # Check whether any filters were passed in.
     # Allowed filters:
-    #    User
-    #    Time Range - start, end
-    #    
-
+    #    user_id -- Games that contain players with user_id
+    #    started_before -- Games that started before [time] exclusive
+    #    started_after -- Games that started after [time] inclusive
     if 'user_id' in request.values:
         uid = request.values['user_id']
+        try:
+            uid = int(uid)
+        except ValueError:
+            return make_response('User_id must be an integer.', '400',\
+                '')
         games = games.filter(Game.players.any(user_id=uid))
 
+    if 'started_after' in request.values:
+        after = request.values['started_after']
+        try:
+            after = datetime.strptime(after,\
+                    '%m/%d/%Y')
+        except ValueError:
+            return make_response('Bad date format. Should be mm/dd/yyyy.', '400',\
+                '')
+
+        games = games.filter(Game.start >= after)
+
+    if 'started_before' in request.values:
+        before = request.values['started_before']
+        try:
+            before = datetime.strptime(before,\
+                    '%m/%d/%Y')
+        except ValueError:
+            return make_response('Bad date format. Should be mm/dd/yyyy.', '400',\
+                '')
+
+        games = games.filter(Game.start < before)
+    
     return jsonify( games=[game.serialize for game in games])
 
 @app.route('/users', methods=['GET'])
@@ -58,7 +84,8 @@ def create_user():
             user.birthday = datetime.strptime(u_json['birthday'],\
                                 '%m/%d/%Y')
         except ValueError:
-            return abort(400)
+            return make_response('birthday must be in format: mm/dd/yyyy', '400',\
+                '')
 
     if 'email' in u_json:
         user.email = u_json['email']
@@ -222,25 +249,49 @@ def create_game():
         try:
             g.start = datetime.strptime(g_json['start'], '%m/%d/%Y %H:%M:%S')
         except ValueError:
-            return abort(404)
-
-    db.session.add(g)
-    db.session.commit()
+            return make_response('start must be in format: mm/dd/yyyy hh:mi:ss',\
+                '400', '')
 
     # Create teams 
     if 'teams' in g_json:
         for team in g_json['teams']:
             t = Team()
-            t.game_id = g.id
+            g.teams.append(t)
+            #t.game_id = g.id
             if 'players' in team:
                 for player in team['players']:
                     p = Player()
-                    p.position = player['position']
-                    p.user_id = player['user_id']
-                    p.game_id = t.game_id 
-                    t.players.append(p)
-            g.teams.append(t)
+                    try:
+                        p.position = int(player['position']) 
+                    except ValueError:
+                        return make_response('position must be an integer', '400',\
+                            '')
+                    try:
+                        p.user_id = int(player['user_id'])
+                    except ValueError:
+                        return make_response('user_id must be an integer', '400',\
+                            '')
 
+                    # Check that user exists 
+                    if db.session.query(User).filter(User.id == p.user_id).count() \
+                    != 1:
+                        return make_response('user_id must reference existing user',\
+                            '400', '')
+
+                    # Check that position is valid: 1-4
+                    if p.position < 1 or p.position > 4:
+                        return make_response('position must be 1 - 4', '400'\
+                            '')
+
+                    # Check that player isn't already in position
+                    if len([player for player in t.players if player.position == p.position]) > 0:
+                        return make_response('only one player per position per team', '400',\
+                            '')
+
+                    g.players.append(p)
+                    t.players.append(p)
+
+    db.session.add(g)
     db.session.commit()
 
     return make_response(('', 201, \
