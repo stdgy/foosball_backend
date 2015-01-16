@@ -109,7 +109,7 @@ def delete_user(user_id):
                 .count()
 
     if player_count > 0:
-        return abort(405)
+        return make_response("can't delete user that is in games", '405', '')
 
     user = users.first()
     db.session.delete(user)
@@ -194,7 +194,14 @@ def make_score(game_id):
         return abort(404)
 
     player = db.session.query(Player)\
-            .filter(Player.id == player_id).first()
+            .filter(Player.id == player_id)\
+            .filter(Player.game_id == game_id)
+
+    # Check that player exists 
+    if player.count() != 1:
+        return make_response('player not found', '404', '')
+
+    player = player.first()
 
     score = Score(player_id=player.id, team_id=player.team_id,\
                 game_id=player.game_id)
@@ -211,7 +218,7 @@ def get_teams(game_id):
     count = db.session.query(Game).filter(Game.id == game_id).count()
 
     if count == 0:
-        return abort(404)
+        return make_response("game doesn't exist", '404', '')
 
     teams = db.session.query(Team).filter(Game.id == game_id)\
             .filter(Game.id == Team.game_id)\
@@ -304,7 +311,7 @@ def delete_game(game_id):
             .filter(Game.id == game_id)
 
     if games.count() != 1:
-        return abort(404)
+        return make_response("game doesn't exist", '404', '')
 
     g = games.first()
 
