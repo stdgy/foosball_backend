@@ -1,15 +1,17 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Date, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, Date, DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref 
+from flask.ext.sqlalchemy import SQLAlchemy
 
-Base = declarative_base()
+#Base = declarative_base()
+db = SQLAlchemy()
 
-class User(Base):
+class User(db.Model):
 	__tablename__ = 'users'
 
 	id = Column(Integer, primary_key=True)
-	name = Column(String)
+	name = Column(String, nullable=False, unique=True)
 	first_name = Column(String)
 	last_name = Column(String)
 	birthday = Column(Date)
@@ -35,7 +37,7 @@ class User(Base):
 			"birthday='%s', email='%s')>") % (self.name, self.first_name, 
 			self.last_name, self.birthday, self.email)
 
-class Game(Base):
+class Game(db.Model):
 	__tablename__ = 'games'
 	id = Column(Integer, primary_key=True)
 	start = Column(DateTime)
@@ -75,7 +77,7 @@ class Game(Base):
 	def __repr__(self):
 		return "<Game(start='%s', end='%s')>" % (self.start, self.end)
 
-class Team(Base):
+class Team(db.Model):
 	__tablename__ = 'teams'
 	id = Column(Integer, primary_key=True)
 	game_id = Column(Integer, ForeignKey('games.id'))
@@ -93,7 +95,7 @@ class Team(Base):
 	def __repr__(self):
 		return "<Team(game_id='%s')>" % self.game_id
 
-class Player(Base):
+class Player(db.Model):
 	__tablename__ = 'players'
 	id = Column(Integer, primary_key=True)
 	user_id = Column(Integer, ForeignKey('users.id'))
@@ -118,12 +120,13 @@ class Player(Base):
 		return ("<Player(user_id='%s', game_id='%s', team_id='%s', "
 			"position='%s')>") % (self.user_id, self.game_id, self.team_id, self.position)
 
-class Score(Base):
+class Score(db.Model):
 	__tablename__ = 'scores'
 	id = Column(Integer, primary_key=True)
 	player_id = Column(Integer, ForeignKey('players.id'))
 	game_id = Column(Integer, ForeignKey('games.id'))
 	team_id = Column(Integer, ForeignKey('teams.id'))
+	own_goal = Column(Boolean)
 
 	@property 
 	def serialize(self):
@@ -137,4 +140,4 @@ class Score(Base):
 
 	def __repr__(self):
 		return ("<Score(player_id='%s', game_id='%s', team_id='%s', "
-			"position='%s')>") % (self.player_id, self.game_id, self.team_id, self.position)
+			"own_goal='%s')>") % (self.player_id, self.game_id, self.team_id, self.own_goal)

@@ -2,8 +2,8 @@ import os
 from datetime import datetime
 from flask import Flask, request, session, g, redirect, url_for, abort, \
         render_template, flash, jsonify, make_response
-from flask.ext.sqlalchemy import SQLAlchemy
-from foosball_models import User, Game, Team, Player, Score 
+from foosball_models import User, Game, Team, Player, Score
+from foosball_models import db 
 
 # create our application
 app = Flask(__name__)
@@ -13,7 +13,7 @@ app.config.update(dict(
     DEBUG=True
 ))
 
-db = SQLAlchemy(app)
+db.init_app(app)
 
 # Routes
 @app.route('/games', methods=['GET'])
@@ -66,31 +66,37 @@ def get_users():
 @app.route('/user', methods=['POST'])
 def create_user():
     u_json = request.json 
-    user = User()
+    u = User()
 
     if 'name' in u_json:
-        user.name = u_json['name']
+        u.name = u_json['name']
     else:
         return abort(400)
+
+    if u.name == '':
+        return make_response('must include a name', '400', '')
+
+    if db.session.query(User).filter(User.name == u.name).count() > 0:
+        return make_response('user already exists', '400', '')
     
     if 'first_name' in u_json:
-        user.first_name = u_json['first_name']
+        u.first_name = u_json['first_name']
 
     if 'last_name' in u_json:
-        user.last_name = u_json['last_name']
+        u.last_name = u_json['last_name']
 
     if 'birthday' in u_json:
         try:
-            user.birthday = datetime.strptime(u_json['birthday'],\
+            u.birthday = datetime.strptime(u_json['birthday'],\
                                 '%m/%d/%Y')
         except ValueError:
             return make_response('birthday must be in format: mm/dd/yyyy', '400',\
                 '')
 
     if 'email' in u_json:
-        user.email = u_json['email']
+        u.email = u_json['email']
 
-    db.session.add(user)
+    db.session.add(u)
     db.session.commit()
 
     return make_response('', '201', { 'location': '/users/%s' % (user.id) })
