@@ -2,8 +2,8 @@ import os
 from datetime import datetime
 from flask import Flask, request, session, g, redirect, url_for, abort, \
         render_template, flash, jsonify, make_response
-from foosball_models import User, Game, Team, Player, Score
-from foosball_models import db 
+from models import User, Game, Team, Player, Score
+from models import db 
 
 # create our application
 app = Flask(__name__)
@@ -267,11 +267,16 @@ def create_game():
 
     # Create teams 
     if 'teams' in g_json:
+        # Make sure there are two teams 
+        if len(g_json['teams']) != 2:
+            return make_response('must provide two teams for a game', '400', '')
         for team in g_json['teams']:
             t = Team()
             g.teams.append(t)
-            #t.game_id = g.id
             if 'players' in team:
+                # Make sure four players supplied
+                if len(team['players']) != 4:
+                    return make_response('must provide 4 players to a team', '400', '')
                 for player in team['players']:
                     p = Player()
                     try:
@@ -303,6 +308,18 @@ def create_game():
 
                     g.players.append(p)
                     t.players.append(p)
+            else:
+                # No players supplied for team
+                return make_response('must supply players for each team', '400', '')
+    else:
+        # No teams supplied for game 
+        return make_response('must supply teams for a game', '400', '')
+
+    # Check that the users in the first team aren't in the second team
+    for player in g.teams[0].players:
+        for other_player in g.teams[1].players:
+            if player.user_id == other_player.user_id:
+                return make_response("the same user can't be on opposing teams", '400', '')
 
     db.session.add(g)
     db.session.commit()
