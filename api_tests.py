@@ -29,10 +29,10 @@ class ApiTestCase(unittest.TestCase):
 		"""Attempt to create a user"""
 		user_json = json.dumps({
 			'name': 'danny', 
-			'first_name': 'Daniel', 
-			'last_name': 'Mathis',
-			'birthday': '05/25/1988',
-			'email': 'daniel@stdgy.com'
+			'first_name': 'Danny', 
+			'last_name': 'Boy',
+			'birthday': '03/04/1985',
+			'email': 'test@fake.com'
 		})
 		resp = self.app.post('/user', content_type='application/json', data=user_json)
 		assert resp.status_code == 201
