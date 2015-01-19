@@ -13,7 +13,14 @@ app.config.update(dict(
     DEBUG=True
 ))
 
+
 db.init_app(app)
+
+def init_db():
+    db.app = app 
+    #db.init_app(app)
+    # Create tables 
+    db.create_all()
 
 # Routes
 @app.route('/games', methods=['GET'])
@@ -99,7 +106,7 @@ def create_user():
     db.session.add(u)
     db.session.commit()
 
-    return make_response('', '201', { 'location': '/users/%s' % (user.id) })
+    return make_response('', '201', { 'location': '/users/%s' % (u.id) })
 
 @app.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
