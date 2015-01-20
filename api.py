@@ -106,9 +106,12 @@ def create_user():
     db.session.add(u)
     db.session.commit()
 
-    return make_response('', '201', { 'location': '/users/%s' % (u.id) })
+    resp = jsonify(u.serialize)
+    resp.status_code = 201
 
-@app.route('/users/<int:user_id>', methods=['DELETE'])
+    return resp
+
+@app.route('/user/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     users = db.session.query(User)\
             .filter(User.id == user_id)

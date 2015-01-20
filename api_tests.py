@@ -37,5 +37,39 @@ class ApiTestCase(unittest.TestCase):
 		resp = self.app.post('/user', content_type='application/json', data=user_json)
 		assert resp.status_code == 201
 
+	def test_create_dup_user(self):
+		"""Attempt to create a duplicate user"""
+		user_json = json.dumps({
+			'name': 'danny', 
+			'first_name': 'Danny', 
+			'last_name': 'Boy',
+			'birthday': '03/04/1985',
+			'email': 'test@fake.com'
+		})
+		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		assert resp.status_code == 201
+
+		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		assert resp.status_code == 400
+
+	def test_delete_user(self):
+		"""Attempt to delete a user"""
+		# Create a user
+		user_json = json.dumps({
+			'name': 'danny', 
+			'first_name': 'Danny', 
+			'last_name': 'Boy',
+			'birthday': '03/04/1985',
+			'email': 'test@fake.com'
+		})
+		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		assert resp.status_code == 201
+
+		j = json.loads(resp.data)
+
+		# Delete the user 
+		resp = self.app.delete('/user/%s' % (j['id'],))
+		assert resp.status_code == 200
+
 if __name__ == '__main__':
 	unittest.main()
