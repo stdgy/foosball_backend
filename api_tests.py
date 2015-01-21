@@ -21,9 +21,14 @@ class ApiTestCase(unittest.TestCase):
 
 	def test_empty_db(self):
 		"""Check resource responses from an empty database"""
+		# Get games
 		rv = self.app.get('/games')
 		resp = json.loads(rv.data)
 		assert len(resp['games']) == 0
+		# Get users
+		resp = self.app.get('/users')
+		users = json.loads(resp.data)
+		assert len(users['users']) == 0
 
 	def test_create_user(self):
 		"""Attempt to create a user"""
@@ -70,6 +75,80 @@ class ApiTestCase(unittest.TestCase):
 		# Delete the user 
 		resp = self.app.delete('/user/%s' % (j['id'],))
 		assert resp.status_code == 200
+
+	def test_multi_users(self):
+		"""Attempt to create multiple users"""
+		# Create users 
+		user_json = json.dumps({
+			'name': 'user1'
+		})
+		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		assert resp.status_code == 201 
+
+		user_json = json.dumps({
+			'name': 'user2'
+		})
+		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		assert resp.status_code == 201 
+
+		# Get users 
+		resp = self.app.get('/users')
+		assert resp.status_code == 200 
+
+		users = json.loads(resp.data)
+
+		assert len(users['users']) == 2
+		assert users['users'][0]['name'] == 'user1'
+		assert users['users'][1]['name'] == 'user2'
+
+	def test_no_games(self):
+		"""Attempt to access game resources where no games exists"""
+		# Get specific game 
+		resp = self.app.get('/games/1')
+		assert resp.status_code == 404
+		assert resp.data == 'game does not exist'
+
+		# Get game's scores
+		resp = self.app.get('/games/1/scores')
+		assert resp.status_code == 404
+		assert resp.data == 'game does not exist'
+
+		# Get game's players
+		resp = self.app.get('/games/1/players')
+		assert resp.status_code == 404
+		assert resp.data == 'game does not exist'
+
+		# Get game's teams 
+		resp = self.app.get('/games/1/teams')
+		assert resp.status_code == 404
+		assert resp.data == 'game does not exist'
+
+		# Delete a game
+		resp = self.app.delete('/games/1')
+		assert resp.status_code == 404
+		assert resp.data == 'game does not exist'
+
+		# Add a score
+		resp = self.app.post('/games/1/score', data={ 'player_id': 1 })
+		assert resp.status_code == 404
+		assert resp.data == 'game does not exist'
+
+	def test_create_delete_game(self):
+		"""Attempt to create a game and delete a game. Backfill users for
+		   required game data"""
+		
+		# Create users we'll use for game 
+		user_ids = []
+		for i in range(8):
+			user_json = json.dumps({
+				'name': 'user%s' % (i,)
+			})
+			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			assert resp.status_code == 201 
+			user_ids.append(resp.data)
+
+		# Create game 
+	
 
 if __name__ == '__main__':
 	unittest.main()

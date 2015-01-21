@@ -139,7 +139,7 @@ def get_game(game_id):
     count = db.session.query(Game).filter(Game.id == game_id).count()
 
     if count == 0:
-        return abort(404)
+        return make_response('game does not exist', '404', '')
 
     game = db.session.query(Game).filter(Game.id == game_id).first()
 
@@ -179,7 +179,7 @@ def get_players(game_id):
     count = db.session.query(Game).filter(Game.id == game_id).count()
 
     if count == 0:
-        return abort(404)
+        return make_response('game does not exist', '404', '')
 
     players = db.session.query(Player).filter(Game.id == game_id)\
             .filter(Game.id == Player.game_id)\
@@ -193,7 +193,7 @@ def get_scores(game_id):
     count = db.session.query(Game).filter(Game.id == game_id).count()
 
     if count == 0:
-        return abort(404)
+        return make_response('game does not exist', '404', '')
 
     scores = db.session.query(Score).filter(Game.id == game_id)\
             .filter(Game.id == Score.game_id)\
@@ -203,6 +203,12 @@ def get_scores(game_id):
 
 @app.route('/games/<int:game_id>/score', methods=['POST'])
 def make_score(game_id):
+    # Check that game exists 
+    game_count = db.session.query(Game).filter(Game.id == game_id).count()
+
+    if game_count == 0:
+        return make_response('game does not exist', '404', '')
+        
     # Try to get form keys 
     player_id = request.form['player_id']
 
@@ -234,7 +240,7 @@ def get_teams(game_id):
     count = db.session.query(Game).filter(Game.id == game_id).count()
 
     if count == 0:
-        return make_response("game doesn't exist", '404', '')
+        return make_response('game does not exist', '404', '')
 
     teams = db.session.query(Team).filter(Game.id == game_id)\
             .filter(Game.id == Team.game_id)\
@@ -338,13 +344,13 @@ def create_game():
         { 'location': 'games/%s' % (g.id) }))
 
 # Delete a game
-@app.route('/game/<int:game_id>', methods=['DELETE'])
+@app.route('/games/<int:game_id>', methods=['DELETE'])
 def delete_game(game_id):
     games = db.session.query(Game)\
             .filter(Game.id == game_id)
 
     if games.count() != 1:
-        return make_response("game doesn't exist", '404', '')
+        return make_response('game does not exist', '404', '')
 
     g = games.first()
 
