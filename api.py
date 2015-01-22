@@ -208,7 +208,7 @@ def make_score(game_id):
 
     if game_count == 0:
         return make_response('game does not exist', '404', '')
-        
+
     # Try to get form keys 
     player_id = request.form['player_id']
 
@@ -340,8 +340,8 @@ def create_game():
     db.session.add(g)
     db.session.commit()
 
-    return make_response(('', 201, \
-        { 'location': 'games/%s' % (g.id) }))
+    return make_response('', 201, \
+        { 'location': 'games/%s' % (g.id) })
 
 # Delete a game
 @app.route('/games/<int:game_id>', methods=['DELETE'])

@@ -3,6 +3,7 @@ import api
 import unittest
 import tempfile
 import json
+from datetime import datetime 
 
 class ApiTestCase(unittest.TestCase):
 
@@ -145,10 +146,35 @@ class ApiTestCase(unittest.TestCase):
 			})
 			resp = self.app.post('/user', content_type='application/json', data=user_json)
 			assert resp.status_code == 201 
-			user_ids.append(resp.data)
+			u = json.loads(resp.data)
+			user_ids.append(u['id'])
 
 		# Create game 
-	
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[3],
+				 	  'position': 4 } ]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 201
 
 if __name__ == '__main__':
 	unittest.main()
