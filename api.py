@@ -111,7 +111,7 @@ def create_user():
 
     return resp
 
-@app.route('/user/<int:user_id>', methods=['DELETE'])
+@app.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     users = db.session.query(User)\
             .filter(User.id == user_id)
@@ -131,7 +131,7 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
 
-    return make_response(('', 200, ''))
+    return make_response('', 204, '')
 
 @app.route('/games/<int:game_id>', methods=['GET'])
 def get_game(game_id):
@@ -143,35 +143,7 @@ def get_game(game_id):
 
     game = db.session.query(Game).filter(Game.id == game_id).first()
 
-    g = {
-        'id': game.id,
-        'start': game.start,
-        'end': game.end,
-        'teams': [],
-        'scores': []
-    }
-
-    for team in game.teams:
-        t = {
-            'id': team.id,
-            'players': []
-        }
-        for player in team.players:
-            t['players'].append({
-                'id': player.id,
-                'position': player.position,
-                'name': player.user.name
-            })
-        g['teams'].append(t)
-
-    for score in game.scores:
-        g['scores'].append({
-            'id': score.id,
-            'player_id': score.player_id,
-            'team_id': score.team_id
-        })
-
-    return jsonify( g )
+    return jsonify( g.serialize )
 
 @app.route('/games/<int:game_id>/players', methods=['GET'])
 def get_players(game_id):
@@ -340,8 +312,10 @@ def create_game():
     db.session.add(g)
     db.session.commit()
 
-    return make_response('', 201, \
-        { 'location': 'games/%s' % (g.id) })
+    resp = jsonify(g.serialize)
+    resp.status_code = 201
+
+    return resp
 
 # Delete a game
 @app.route('/games/<int:game_id>', methods=['DELETE'])
@@ -357,7 +331,7 @@ def delete_game(game_id):
     db.session.delete(g)
     db.session.commit()
 
-    return make_response(('', 200, None))
+    return make_response('', 204, None)
 
 
 @app.route("/static/<path:path>", methods=['GET'])
