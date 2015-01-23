@@ -74,8 +74,8 @@ class ApiTestCase(unittest.TestCase):
 		j = json.loads(resp.data)
 
 		# Delete the user 
-		resp = self.app.delete('/user/%s' % (j['id'],))
-		assert resp.status_code == 200
+		resp = self.app.delete('/users/%s' % (j['id'],))
+		assert resp.status_code == 204
 
 	def test_multi_users(self):
 		"""Attempt to create multiple users"""
@@ -175,6 +175,16 @@ class ApiTestCase(unittest.TestCase):
 		})
 		resp = self.app.post('/game', content_type='application/json', data=game_json)
 		assert resp.status_code == 201
+
+		game_json = json.loads(resp.data)
+
+		# Delete game 
+		resp = self.app.delete('/games/%s' % (game_json['id'],))
+		assert resp.status_code == 204
+
+	# Test create game with bad users
+	# Test create game with bad positions
+	# Test create game with incomplete teams
 
 if __name__ == '__main__':
 	unittest.main()
