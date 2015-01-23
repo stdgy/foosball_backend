@@ -52,14 +52,28 @@ class Game(db.Model):
 
 	@property 
 	def serialize(self):
+		teams = []
+		for team in self.teams:
+			t = { 
+				'id': team.id,
+				'players': [] 
+			}
+			for player in team.players:
+				t['players'].append({
+					'id': player.id,
+					'position': player.position,
+					'user': player.user.serialize
+				})
+			teams.append(t)
+
 		"""Return full Game object"""
 		return {
 			'id': self.id,
-			'start': self.start,
-			'end': self.end,
-			'players': self.serialize_players,
-			'teams': self.serialize_teams,
-			'scores': self.serialize_scores
+			'start': self.start.strftime('%m/%d/%Y %H:%M:%S') if self.start is not None\
+					else '',
+			'end': self.end.strftime('%m/%d/%Y %H:%M:%S') if self.end is not None\
+					else '',
+			'teams': teams
 		}
 
 	@property 
