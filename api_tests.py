@@ -182,9 +182,328 @@ class ApiTestCase(unittest.TestCase):
 		resp = self.app.delete('/games/%s' % (game_json['id'],))
 		assert resp.status_code == 204
 
-	# Test create game with bad users
-	# Test create game with bad positions
-	# Test create game with incomplete teams
+	def test_game_bad_user(self):
+		"""Create a game with bad users"""
+
+		# Create game with nonexistent users
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': 1,
+				 	  'position': 1 }, 
+				 	{ 'user_id': 2,
+				 	  'position': 2 }, 
+				 	{ 'user_id': 3,
+				 	  'position': 3 }, 
+				 	{ 'user_id': 4,
+				 	  'position': 4 } ]},
+				 { 'players': [
+				 	{ 'user_id': 5,
+				 	  'position': 1 },
+				 	{ 'user_id': 6,
+				 	  'position': 2 },
+				 	{ 'user_id': 7,
+				 	  'position': 3 },
+				 	{ 'user_id': 8,
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 400
+		assert resp.data == 'user_id must reference existing user'
+
+		# Add users 
+		user_ids = []
+		for i in range(8):
+			user_json = json.dumps({
+				'name': 'user%s' % (i,)
+			})
+			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			assert resp.status_code == 201 
+			u = json.loads(resp.data)
+			user_ids.append(u['id'])
+
+		# Create game with same user on opposite teams
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[3],
+				 	  'position': 4 } ]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 400
+		assert resp.data == "the same user can't be on opposing teams"
+
+	def test_game_bad_position(self):
+		"""Create a game with bad position data"""
+
+		# Add users 
+		user_ids = []
+		for i in range(8):
+			user_json = json.dumps({
+				'name': 'user%s' % (i,)
+			})
+			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			assert resp.status_code == 201 
+			u = json.loads(resp.data)
+			user_ids.append(u['id'])
+
+		# Create game with too few positions on a team
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 400
+		assert resp.data == 'must provide 4 players to a team'
+
+		# Create a game with too many positions on a team
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 4 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 400
+		assert resp.data == 'must provide 4 players to a team'
+
+		# Create a game with position less than 1
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 4 }]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 0 },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 400
+		assert resp.data == 'position must be 1 - 4'
+
+		# Create a game with position > 4
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 4 }]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 5 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 400
+		assert resp.data == 'position must be 1 - 4'
+
+	def test_game_bad_teams(self):
+		"""Create games with incorrectly defined teams"""
+
+		# Add users
+		user_ids = []
+		for i in range(12):
+			user_json = json.dumps({
+				'name': 'user%s' % (i,)
+			})
+			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			assert resp.status_code == 201 
+			u = json.loads(resp.data)
+			user_ids.append(u['id'])
+		
+		# Test no teams 
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S')
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 400
+		assert resp.data == 'must supply teams for a game'
+
+		# Test only single team
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 400
+		assert resp.data == 'must provide two teams for a game'
+
+		# Test three teams 
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 4 }]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4 }]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[8],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[9],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[10],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[11],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 400
+		assert resp.data == 'must provide two teams for a game'
+
+	def test_game_scores(self):
+		"""Send score data to a created game"""
+
+		# Add users 
+		user_ids = []
+		for i in range(8):
+			user_json = json.dumps({
+				'name': 'user%s' % (i,)
+			})
+			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			assert resp.status_code == 201 
+			u = json.loads(resp.data)
+			user_ids.append(u['id'])
+
+		# Create game
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 4 }]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 201
+
+		game = json.loads(resp.data)
+
+		# Send a score to the game
+
+		# Send a score with a time to the game
+
+		# Update the full game object
 
 if __name__ == '__main__':
 	unittest.main()
