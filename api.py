@@ -176,16 +176,23 @@ def get_scores(game_id):
 @app.route('/games/<int:game_id>/score', methods=['POST'])
 def make_score(game_id):
     # Check that game exists 
-    game_count = db.session.query(Game).filter(Game.id == game_id).count()
+    game = db.session.query(Game).filter(Game.id == game_id)
 
-    if game_count == 0:
+    if game.count() == 0:
         return make_response('game does not exist', '404', '')
+
+    # Check that game isn't over 
+    game = game.first()
+    if game.end is not None:
+        return make_response('game is already over', '400', '')
+
+    # Check that neither team already has 10 points in game
 
     # Try to get form keys 
     player_id = request.form['player_id']
 
     if player_id == None:
-        return abort(404)
+        return make_response('must pass player_id', 400, '')
 
     player = db.session.query(Player)\
             .filter(Player.id == player_id)\
@@ -198,7 +205,7 @@ def make_score(game_id):
     player = player.first()
 
     score = Score(player_id=player.id, team_id=player.team_id,\
-                game_id=player.game_id)
+                game_id=player.game_id, time=datetime.now())
 
     db.session.add(score)
     db.session.commit()
