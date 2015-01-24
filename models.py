@@ -140,6 +140,7 @@ class Score(db.Model):
 	player_id = Column(Integer, ForeignKey('players.id'))
 	game_id = Column(Integer, ForeignKey('games.id'))
 	team_id = Column(Integer, ForeignKey('teams.id'))
+	time = Column(DateTime)
 	own_goal = Column(Boolean)
 
 	@property 
