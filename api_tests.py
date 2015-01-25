@@ -498,8 +498,11 @@ class ApiTestCase(unittest.TestCase):
 		assert resp.status_code == 201
 
 		game = json.loads(resp.data)
+		player_id = game.get('teams')[0].get('players')[0].get('id')
 
 		# Send a score to the game
+		resp = self.app.post('/games/%s/score' % (game.get('id')), data={ 'player_id': player_id })
+		assert resp.status_code == 201
 
 		# Send a score with a time to the game
 
