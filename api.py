@@ -175,6 +175,7 @@ def get_scores(game_id):
 
 @app.route('/games/<int:game_id>/score', methods=['POST'])
 def make_score(game_id):
+    """Takes a JSON object representing a new score and inserts it into the db"""
     # Check that game exists 
     game = db.session.query(Game).filter(Game.id == game_id)
 
@@ -188,11 +189,28 @@ def make_score(game_id):
 
     # Check that neither team already has 10 points in game
 
-    # Try to get form keys 
-    player_id = request.form['player_id']
+    # Make sure JSON was passed in
+    if request.json is None:
+        return make_response('must pass in score object', '400', '')
+        
+    # Load json
+    score_json = request.json
+    player_id = score_json.get('player_id')
+    time = score_json.get('time')
+    own_goal = score_json.get('own_goal')
 
-    if player_id == None:
+    if player_id is None:
         return make_response('must pass player_id', 400, '')
+
+    # See if time scored was sent in. If not, populate.
+    if time is None:
+        time = datetime.now()
+    else:
+        time = datetime.strptime(time, '%d/%m/%Y %H:%M:%S')
+
+    # Check own goal. If not sent in, set to false.
+    if own_goal is None:
+        own_goal = false
 
     player = db.session.query(Player)\
             .filter(Player.id == player_id)\
@@ -205,7 +223,7 @@ def make_score(game_id):
     player = player.first()
 
     score = Score(player_id=player.id, team_id=player.team_id,\
-                game_id=player.game_id, time=datetime.now())
+                game_id=player.game_id, time=time, own_goal=own_goal)
 
     db.session.add(score)
     db.session.commit()
