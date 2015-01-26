@@ -148,9 +148,9 @@ class Score(db.Model):
 		"""Return Score Object"""
 		return {
 			'id': self.id,
-			'player_id': self.player_id,
-			'game_id': self.game_id,
-			'team_id': self.team_id
+			'time': self.time.strftime('%d/%m/%Y %H:%M:%S') if self.time is not None\
+				else '',
+			'own_goal': self.own_goal
 		}
 
 	def __repr__(self):
