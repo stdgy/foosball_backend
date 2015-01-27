@@ -188,11 +188,21 @@ def make_score(game_id):
         return make_response('game is already over', '400', '')
 
     # Check that neither team already has 10 points in game
+    for team in game.teams:
+        total_score = 0
+        for player in team.players:
+            for score in player.scores:
+                if score.own_goal:
+                    total_score -= 1
+                else:
+                    total_score += 1
+        if total_score >= 10:
+            return make_response('team already has 10 points', '400', '')
 
     # Make sure JSON was passed in
     if request.json is None:
         return make_response('must pass in score object', '400', '')
-        
+
     # Load json
     score_json = request.json
     player_id = score_json.get('player_id')
@@ -206,11 +216,15 @@ def make_score(game_id):
     if time is None:
         time = datetime.now()
     else:
-        time = datetime.strptime(time, '%d/%m/%Y %H:%M:%S')
+        try:
+            time = datetime.strptime(time, '%m/%d/%Y %H:%M:%S')
+        except ValueError:
+            return make_response('time must be encoded month/day/year 24hour:min:second',\
+                '400', '')
 
     # Check own goal. If not sent in, set to false.
     if own_goal is None:
-        own_goal = false
+        own_goal = False
 
     player = db.session.query(Player)\
             .filter(Player.id == player_id)\
@@ -228,8 +242,10 @@ def make_score(game_id):
     db.session.add(score)
     db.session.commit()
 
-    return make_response(('', 201, \
-        { 'location': 'games/' + str(player.game_id) + '/scores/' + str(score.id) }))
+    r_json = jsonify(score.serialize)
+    r_json.status_code = 201 
+
+    return r_json 
 
 @app.route('/games/<int:game_id>/teams', methods=['GET'])
 def get_teams(game_id):
