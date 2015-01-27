@@ -500,13 +500,102 @@ class ApiTestCase(unittest.TestCase):
 		game = json.loads(resp.data)
 		player_id = game.get('teams')[0].get('players')[0].get('id')
 
+		# Create a new score
+		score_json = json.dumps({
+			'player_id': player_id,
+			'own_goal': False 
+		})
 		# Send a score to the game
-		resp = self.app.post('/games/%s/score' % (game.get('id')), data={ 'player_id': player_id })
+		resp = self.app.post('/games/%s/score' % (game.get('id')), \
+			content_type='application/json', data=score_json)
 		assert resp.status_code == 201
 
 		# Send a score with a time to the game
+		score_json = json.dumps({
+			'player_id': player_id, 
+			'own_goal': False,
+			'time': datetime.now().strftime('%m/%d/%Y %H:%M:%S')
+		})
+		resp = self.app.post('/games/%s/score' % (game.get('id')), \
+			content_type='application/json', data=score_json)
+		assert resp.status_code == 201
 
-		# Update the full game object
+		# Send an own goal 
+		score_json = json.dumps({
+			'player_id': player_id,
+			'own_goal': True
+		})
+		resp = self.app.post('/games/%s/score' % (game.get('id')), \
+			content_type='application/json', data=score_json)
+		assert resp.status_code == 201 
+
+	def test_full_score(self):
+		"""Score an entire game"""
+
+		# Add users 
+		user_ids = []
+		for i in range(8):
+			user_json = json.dumps({
+				'name': 'user%s' % (i,)
+			})
+			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			assert resp.status_code == 201 
+			u = json.loads(resp.data)
+			user_ids.append(u['id'])
+
+		# Create game
+		game_json = json.dumps({
+			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 4 }]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 201
+
+		game = json.loads(resp.data)
+		player_id = game.get('teams')[0].get('players')[0].get('id')
+
+		# Give player 10 scores
+		for i in range(10):
+			score_json = json.dumps({
+				'player_id': player_id, 
+				'own_goal': False 
+			})
+			resp = self.app.post('/games/%s/score' % (game.get('id')), \
+				content_type='application/json', data=score_json)
+			assert resp.status_code == 201
+
+		# Try to give player another score. Verify error.
+		score_json = json.dumps({
+			'player_id': player_id, 
+			'own_goal': False 
+		})
+		resp = self.app.post('/games/%s/score' % (game.get('id')),
+			content_type='application/json', data=score_json)
+		assert resp.status_code == 400
+		assert resp.data == 'team already has 10 points'
+
+	# Test update game through PUT requests. Will take entire game model.
+
+	# Create an entire game with a single game POST.
 
 if __name__ == '__main__':
 	unittest.main()
