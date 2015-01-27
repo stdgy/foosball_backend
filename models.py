@@ -148,7 +148,7 @@ class Score(db.Model):
 		"""Return Score Object"""
 		return {
 			'id': self.id,
-			'time': self.time.strftime('%d/%m/%Y %H:%M:%S') if self.time is not None\
+			'time': self.time.strftime('%m/%d/%Y %H:%M:%S') if self.time is not None\
 				else '',
 			'own_goal': self.own_goal
 		}
