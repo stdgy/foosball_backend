@@ -219,7 +219,7 @@ def make_score(game_id):
         try:
             time = datetime.strptime(time, '%m/%d/%Y %H:%M:%S')
         except ValueError:
-            return make_response('time must be encoded month/day/year 24hour:min:second',\
+            return make_response('time must be encoded mm/dd/yyyy hh:mm:ss',\
                 '400', '')
 
     # Check own goal. If not sent in, set to false.
@@ -308,6 +308,7 @@ def create_game():
                     return make_response('must provide 4 players to a team', '400', '')
                 for player in team['players']:
                     p = Player()
+
                     try:
                         p.position = int(player['position']) 
                     except ValueError:
@@ -331,12 +332,35 @@ def create_game():
                             '')
 
                     # Check that player isn't already in position
-                    if len([player for player in t.players if player.position == p.position]) > 0:
+                    if len([player for p2 in t.players if p2.position == p.position]) > 0:
                         return make_response('only one player per position per team', '400',\
                             '')
 
                     g.players.append(p)
                     t.players.append(p)
+
+                    # Read in any scores for player 
+                    if 'scores' in player:
+                        for score in player.get('scores'):
+                            s = Score() 
+                            # Time must be in score 
+                            if 'time' in score:
+                                try:
+                                    s.time = datetime.strptime(score.get('time'), '%m/%d/%Y %H:%M:%S')
+                                except ValueError:
+                                    make_response('score time must be in mm/dd/yyyy hh:mi:ss',\
+                                        '400', '')
+                            else:
+                                make_response('must include with a score', '400', '')
+
+                            if 'own_goal' in score and score.get('own_goal') is True:
+                                s.own_goal = True 
+                            else:
+                                s.own_goal = False 
+
+                            p.scores.append(s)
+                            g.scores.append(s)
+
             else:
                 # No players supplied for team
                 return make_response('must supply players for each team', '400', '')
@@ -349,6 +373,24 @@ def create_game():
         for other_player in g.teams[1].players:
             if player.user_id == other_player.user_id:
                 return make_response("the same user can't be on opposing teams", '400', '')
+
+    # See if game end time is passed in
+    if 'end' in g_json:
+        try:
+            g.end = datetime.strptime(g_json.get('end'), '%m/%d/%Y %H:%M:%S')
+        except ValueError:
+            return make_response('end must be in format: mm/dd/yyyy hh:mi:ss',\
+                '400', '')
+        # Verify enough points passed in for game to be over 
+        team1_scores = reduce(lambda x, y: x.scores + y.scores, g.team[0].players)
+        team2_scores = reduce(lambda x, y: x.scores + y.scores, g.team[1].players)
+        team1_points = len(filter(lambda x: x.own_goal is False, team1_scores)) +\
+                        len(filter(lambda x: x.own_goal is True, team2_scores))
+        team2_points = len(filter(lambda x: x.own_goal is False, team2_scores)) +\
+                        len(filter(lambda x: x.own_goal is True, team1_scores))
+        if team1_points != 10 and team2_points != 10:
+            return make_response('at least one team must have 10 points for game to end',\
+                '400', '')
 
     db.session.add(g)
     db.session.commit()
