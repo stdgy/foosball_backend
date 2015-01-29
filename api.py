@@ -382,8 +382,8 @@ def create_game():
             return make_response('end must be in format: mm/dd/yyyy hh:mi:ss',\
                 '400', '')
         # Verify enough points passed in for game to be over 
-        team1_scores = reduce(lambda x, y: x.scores + y.scores, g.team[0].players)
-        team2_scores = reduce(lambda x, y: x.scores + y.scores, g.team[1].players)
+        team1_scores = reduce(lambda x, y: x + y, map(lambda x: x.scores, g.teams[0].players))
+        team2_scores = reduce(lambda x, y: x + y, map(lambda x: x.scores, g.teams[1].players))
         team1_points = len(filter(lambda x: x.own_goal is False, team1_scores)) +\
                         len(filter(lambda x: x.own_goal is True, team2_scores))
         team2_points = len(filter(lambda x: x.own_goal is False, team2_scores)) +\
