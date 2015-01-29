@@ -151,7 +151,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game 
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -187,7 +187,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game with nonexistent users
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': 1,
@@ -226,7 +226,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game with same user on opposite teams
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -268,7 +268,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game with too few positions on a team
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -294,7 +294,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create a game with too many positions on a team
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -324,7 +324,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create a game with position less than 1
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -352,7 +352,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create a game with position > 4
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -394,7 +394,7 @@ class ApiTestCase(unittest.TestCase):
 		
 		# Test no teams 
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S')
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S')
 		})
 		resp = self.app.post('/game', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
@@ -402,7 +402,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Test only single team
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -421,7 +421,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Test three teams 
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -472,7 +472,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -545,7 +545,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game
 		game_json = json.dumps({
-			'start_time': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
 				{ 'players': [
 				 	{ 'user_id': user_ids[0],
@@ -596,6 +596,77 @@ class ApiTestCase(unittest.TestCase):
 	# Test update game through PUT requests. Will take entire game model.
 
 	# Create an entire game with a single game POST.
+	def test_entire_game(self):
+		"""Create an entire, complete game in one POST"""
+
+		# Add users 
+		user_ids = []
+		for i in range(8):
+			user_json = json.dumps({
+				'name': 'user%s' % (i,)
+			})
+			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			assert resp.status_code == 201 
+			u = json.loads(resp.data)
+			user_ids.append(u['id'])
+
+		# Create game
+		game_json = json.dumps({
+			'start': '01/15/2015 18:11:10',
+			'end': '01/15/2015 18:12:00',
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1, 
+				 	  'scores': [
+				 	   	{ 'time': '01/15/2015 18:11:12'}, 
+				 	   	{ 'time': '01/15/2015 18:11:20'}, 
+				 	   	{ 'time': '01/15/2015 18:11:21',
+				 	   	  'own_goal': True }]}, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2,
+				 	  'scores': [
+				 	  	{ 'time': '01/15/2015 18:11:13'}, 
+				 	  	{ 'time': '01/15/2015 18:11:22'}]}, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3,
+				 	  'scores': [
+				 	  	{ 'time': '01/15/2015 18:11:14'},
+				 	  	{ 'time': '01/15/2015 18:11:23'}] }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 4,
+				 	  'scores': [
+				 	  	{ 'time': '01/15/2015 18:11:24'},
+				 	  	{ 'time': '01/15/2015 18:11:25'}]}
+				 ]
+				},
+				{ 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1,
+				 	  'scores': [
+				 	  	{ 'time': '01/15/2015 18:11:16'}, 
+				 	  	{ 'time': '01/15/2015 18:11:26'}] },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2,
+				 	  'scores': [
+				 	  	{ 'time': '01/15/2015 18:11:17'}, 
+				 	  	{ 'time': '01/15/2015 18:11:27'}, 
+				 	  	{ 'time': '01/15/2015 18:11:28'}] },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3,
+				 	  'scores': [
+				 	  	{ 'time': '01/15/2015 18:11:18'}, 
+				 	  	{ 'time': '01/15/2015 18:11:29'}] },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4,
+				 	  'scores': [
+				 	  	{ 'time': '01/15/2015 18:11:19'}, 
+				 	  	{ 'time': '01/15/2015 18:11:30'}] }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 201
+
 
 if __name__ == '__main__':
 	unittest.main()
