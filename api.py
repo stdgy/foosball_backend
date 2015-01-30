@@ -111,6 +111,37 @@ def create_user():
 
     return resp
 
+@app.route('/users/<int:user_id>', methods=['PUT'])
+def put_user(user_id):
+    """Update an existng user object"""
+    # Check that user exists 
+    user = db.session.query(User).filter(User.id == user_id)
+
+    if user.count() == 0:
+        return make_response('user does not exist', '404', '')
+
+    user = user.first()
+    user_json = request.json
+
+    # Update non-key fields for user
+    user.name = user_json.get('name', user.name)
+    user.first_name = user_json.get('first_name', user.first_name)
+    user.last_name = user_json.get('last_name', user.last_name)
+    if 'birthday' in user_json:
+        try:
+            user.birthday = datetime.strptime(user_json.get('birthday'),\
+                '%m/%d/%Y')
+        except ValueError:
+            return make_response('birthday must be in form mm/dd/yyyy', '400', '')
+    user.email = user_json.get('email', user.email)
+
+    db.session.commit()
+
+    j_response = jsonify(user.serialize)
+    j_response.status_code = 204
+
+    return j_response
+
 @app.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     users = db.session.query(User)\
