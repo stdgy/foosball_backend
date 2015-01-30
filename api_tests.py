@@ -58,6 +58,32 @@ class ApiTestCase(unittest.TestCase):
 		resp = self.app.post('/user', content_type='application/json', data=user_json)
 		assert resp.status_code == 400
 
+	def test_update_user(self):
+		"""Attempt to update an existing user"""
+		# Create a user
+		user_json = json.dumps({
+			'name': 'danny', 
+			'first_name': 'Danny', 
+			'last_name': 'Boy',
+			'birthday': '03/04/1985',
+			'email': 'test@fake.com'
+		})
+		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		assert resp.status_code == 201
+
+		j = json.loads(resp.data)
+
+		# Change user information
+		j['name'] = 'bobby'
+		j['first_name'] = 'Bob'
+		j['last_name'] = 'Jones'
+		j['birthday'] = '05/26/1988'
+		j['email'] = 'bob@jones.com'
+
+		resp = self.app.put('/users/%s' % (j['id']), content_type='application/json', data=json.dumps(j))
+		assert resp.status_code == 204
+
+
 	def test_delete_user(self):
 		"""Attempt to delete a user"""
 		# Create a user
