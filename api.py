@@ -431,6 +431,45 @@ def create_game():
 
     return resp
 
+@app.route('/games/<int:game_id>', methods=['PUT'])
+def update_game(game_id):
+    """Updates the game resource through a PUT request"""
+    # Verify game exists
+    game = db.session.query(Game).filter(Game.id == game_id)
+
+    if game.count() == 0:
+        return make_response('game does not exist', '404', '')
+
+    game = game.first()
+    g_json = request.json
+
+    if 'start' in g_json:
+        try:
+            game.start = datetime.strptime(g_json.get('start'), \
+                '%m/%d/%Y %H:%M:%S')
+        except ValueError:
+            return make_response('date format must be mm/dd/yyyy hh:mm:ss', '400', '')
+
+    if 'end' in g_json:
+        try:
+            game.end = datetime.strptime(g_json.get('end'), \
+                '%m/%d/%Y %H:%M:%S')
+        except ValueError:
+            return make_response('date format must be mm/dd/yyyy hh:mm:ss', '400', '')
+
+    if 'teams' in g_json:
+        for team in g_json.get('teams'):
+            # Check if team's in game
+            # If not, make sure not already two teams
+            if 'players' in team:
+                for player in team.get('players'):
+                    # Check if player's on team
+                    # IF not, make sure not already 4 players
+                    if 'scores' in player:
+                        for score in player.get('scores'):
+                            # Check if player already has score
+
+
 # Delete a game
 @app.route('/games/<int:game_id>', methods=['DELETE'])
 def delete_game(game_id):
