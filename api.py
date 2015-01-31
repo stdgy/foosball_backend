@@ -19,6 +19,7 @@ db.init_app(app)
 def init_db():
     db.app = app 
     #db.init_app(app)
+    #db.drop_all()
     # Create tables 
     db.create_all()
 
@@ -459,12 +460,57 @@ def update_game(game_id):
 
     if 'teams' in g_json:
         for team in g_json.get('teams'):
-            # Check if team's in game
-            # If not, make sure not already two teams
+            t = None # team
+            if 'id' not in team:
+                # If ID not supplied, will have to create
+                if len(game.teams) >= 2:
+                    return make_response('game already has two teams', '400', '')
+                t = Team()
+                game.teams.append(t)
+            else:
+                # Retrieve existing team
+                t = db.session.get(Team).filter(Team.id == team.get('id')).first()
+
+                if t is None:
+                    return make_response('team does not exist', '404', '')
+
+                if t.game_id != game.id:
+                    return make_response('team not in game', '400', '')
+
+                # Reached this point, should be good... Team exists and is in the 
+                # game already.
+
             if 'players' in team:
                 for player in team.get('players'):
-                    # Check if player's on team
-                    # IF not, make sure not already 4 players
+                    p = None # Player
+                    if 'id' not in player:
+                        # player hasn't been created yet.
+                        # run some validation.
+                        if len(t.players) >= 4:
+                            return make_response('team already has four players', '400', '')
+                        p = Player()
+                        p.position = player.get('position')
+
+                        if p.position is None:
+                            return make_response('each player must have a position', '400', '')
+                        else:
+                            # Make sure not already player on team in this posiiton
+                            for x in t.players:
+                                if x.position = p.position:
+                                    return make_response('already player in this position on team',\
+                                        '400', '')
+                    else:
+                        p = db.session.get(Player).filter(Player.id == player.get('id')).first()
+
+                        if p is None:
+                            return make_response('no player with given id', '404', '')
+
+                        if p.game_id != game.id:
+                            return make_response('player not in game', '400', '')
+
+                        if p.team_id != team.id:
+                            return make_response('player not on team', '400', '')
+
                     if 'scores' in player:
                         for score in player.get('scores'):
                             # Check if player already has score
