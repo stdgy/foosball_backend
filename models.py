@@ -95,6 +95,7 @@ class Team(db.Model):
 	__tablename__ = 'teams'
 	id = Column(Integer, primary_key=True)
 	game_id = Column(Integer, ForeignKey('games.id'))
+	name = Column(String, nullable=False)
 
 	players = relationship("Player", backref="team")
 
