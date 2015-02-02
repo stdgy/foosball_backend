@@ -499,6 +499,10 @@ def update_game(game_id):
                                 if x.position = p.position:
                                     return make_response('already player in this position on team',\
                                         '400', '')
+                        # TODO: Get and validate user information
+                        
+                        game.players.append(p)
+                        t.players.append(p)
                     else:
                         p = db.session.get(Player).filter(Player.id == player.get('id')).first()
 
@@ -508,12 +512,44 @@ def update_game(game_id):
                         if p.game_id != game.id:
                             return make_response('player not in game', '400', '')
 
-                        if p.team_id != team.id:
+                        if p.team_id != t.id:
                             return make_response('player not on team', '400', '')
 
                     if 'scores' in player:
                         for score in player.get('scores'):
-                            # Check if player already has score
+                            s = None # Score 
+                            if 'id' not in score:
+                                # Score shouldn't exist. Add it in.
+                                s = Score()
+                                if 'time' in score:
+                                    try:
+                                        s.time = datetime.strptime(score.get('time'),\
+                                            '%m/%d/%Y %H:%M:%S')
+                                    except ValueError:
+                                        return make_response('date format must be mm/dd/yyyy hh:ss:mi',\
+                                            '400', '')
+                                else:
+                                    s.time = datetime.now()
+
+                                s.own_goal = sore.get('own_goal', False)
+
+                                game.scores.append(s)
+                                p.scores.append(s)
+                            else:
+                                # Score should already exist...
+                                s = db.session.get(Score).filter(Score.id == score.get('id')).first()
+
+                                if s is None:
+                                    return make_response('no score with given id', '404', '')
+
+                                if s.game_id != game.id:
+                                    return make_response('score not in game', '400', '')
+
+                                if s.team_id != t.id:
+                                    return make_response('score not with correct team', '400', '')
+
+                                if s.player_id != p.id:
+                                    return make_response('score not with correct player', '400', '')
 
 
 # Delete a game
