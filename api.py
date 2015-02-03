@@ -496,11 +496,24 @@ def update_game(game_id):
                         else:
                             # Make sure not already player on team in this posiiton
                             for x in t.players:
-                                if x.position = p.position:
+                                if x.position == p.position:
                                     return make_response('already player in this position on team',\
                                         '400', '')
-                        # TODO: Get and validate user information
-                        
+                        if p.position > 4 or p.position < 1:
+                            return make_response('position must be between 1 and 4 inclusive', \
+                                '400', '')
+
+                        # Get and validate user information
+                        p.user_id = player.get('user_id')
+
+                        if p.user_id is None:
+                            return make_response('every player must reference an existing user',
+                                '400', '')
+
+                        if db.session.query(User).filter(User.id == p.user_id).count() != 1:
+                            return make_response('user id must reference an existing user', \
+                                '400', '')
+
                         game.players.append(p)
                         t.players.append(p)
                     else:
@@ -550,7 +563,11 @@ def update_game(game_id):
 
                                 if s.player_id != p.id:
                                     return make_response('score not with correct player', '400', '')
+    db.session.commit()
+    j = jsonify(game)
+    j.status_code = 200
 
+    return j
 
 # Delete a game
 @app.route('/games/<int:game_id>', methods=['DELETE'])
