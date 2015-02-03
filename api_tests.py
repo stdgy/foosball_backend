@@ -619,7 +619,53 @@ class ApiTestCase(unittest.TestCase):
 		assert resp.status_code == 400
 		assert resp.data == 'team already has 10 points'
 
-	# Test update game through PUT requests. Will take entire game model.
+	def test_game_put(self):
+		"""Update a game's state through PUT requests"""
+
+		# Add users 
+		user_ids = []
+		for i in range(8):
+			user_json = json.dumps({
+				'name': 'user%s' % (i,)
+			})
+			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			assert resp.status_code == 201 
+			u = json.loads(resp.data)
+			user_ids.append(u['id'])
+
+		# Create game
+		game_json = json.dumps({
+			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'teams': [
+				{ 'players': [
+				 	{ 'user_id': user_ids[0],
+				 	  'position': 1 }, 
+				 	{ 'user_id': user_ids[1],
+				 	  'position': 2 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 3 }, 
+				 	{ 'user_id': user_ids[2],
+				 	  'position': 4 }]},
+				 { 'players': [
+				 	{ 'user_id': user_ids[4],
+				 	  'position': 1 },
+				 	{ 'user_id': user_ids[5],
+				 	  'position': 2 },
+				 	{ 'user_id': user_ids[6],
+				 	  'position': 3 },
+				 	{ 'user_id': user_ids[7],
+				 	  'position': 4 }]}
+				 ]
+		})
+		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		assert resp.status_code == 201
+
+		game = json.loads(resp.data)
+
+		# Send PUT to update teams
+		# Send PUT to update scores
+		# Send PUT to finish adding scores
+		# Send PUT to try adding scores to a completed game
 
 	# Create an entire game with a single game POST.
 	def test_entire_game(self):
