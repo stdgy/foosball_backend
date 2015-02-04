@@ -179,7 +179,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -188,7 +190,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 }, 
 				 	{ 'user_id': user_ids[3],
 				 	  'position': 4 } ]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[5],
@@ -215,7 +219,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': 1,
 				 	  'position': 1 }, 
 				 	{ 'user_id': 2,
@@ -224,7 +230,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 }, 
 				 	{ 'user_id': 4,
 				 	  'position': 4 } ]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': 5,
 				 	  'position': 1 },
 				 	{ 'user_id': 6,
@@ -254,7 +262,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -263,7 +273,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 }, 
 				 	{ 'user_id': user_ids[3],
 				 	  'position': 4 } ]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[0],
@@ -296,14 +308,18 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
 				 	  'position': 2 }, 
 				 	{ 'user_id': user_ids[2],
 				 	  'position': 3 }]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[5],
@@ -322,7 +338,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -333,7 +351,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }, 
 				 	{ 'user_id': user_ids[2],
 				 	  'position': 3 }]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[5],
@@ -352,7 +372,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -361,7 +383,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 }, 
 				 	{ 'user_id': user_ids[2],
 				 	  'position': 4 }]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 0 },
 				 	{ 'user_id': user_ids[5],
@@ -380,7 +404,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -389,7 +415,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 }, 
 				 	{ 'user_id': user_ids[2],
 				 	  'position': 4 }]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[5],
@@ -430,7 +458,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -449,7 +479,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -458,7 +490,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 }, 
 				 	{ 'user_id': user_ids[2],
 				 	  'position': 4 }]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[5],
@@ -467,7 +501,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 },
 				 	{ 'user_id': user_ids[7],
 				 	  'position': 4 }]},
-				 { 'players': [
+				 { 
+				 	'name': 'yellow',
+				 	'players': [
 				 	{ 'user_id': user_ids[8],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[9],
@@ -500,7 +536,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -509,7 +547,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 }, 
 				 	{ 'user_id': user_ids[2],
 				 	  'position': 4 }]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[5],
@@ -573,7 +613,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -582,7 +624,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 }, 
 				 	{ 'user_id': user_ids[2],
 				 	  'position': 4 }]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[5],
@@ -637,7 +681,9 @@ class ApiTestCase(unittest.TestCase):
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1 }, 
 				 	{ 'user_id': user_ids[1],
@@ -646,7 +692,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 3 }, 
 				 	{ 'user_id': user_ids[2],
 				 	  'position': 4 }]},
-				 { 'players': [
+				 { 
+				 	'name': 'blue',
+				 	'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1 },
 				 	{ 'user_id': user_ids[5],
@@ -664,6 +712,18 @@ class ApiTestCase(unittest.TestCase):
 
 		# Send PUT to update teams
 		# Send PUT to update scores
+		game['teams'][0]['players'][0]['scores'] = [
+			{
+				'time': datetime.now().strftime('%m/%d/%Y %H:%M:%S'),
+				'own_goal': False
+			}
+		]
+		game_json = json.dumps(game)
+
+		resp = self.app.put('/games/%s' % (game['id']), content_type='application/json',\
+			data=game_json)
+		assert resp.status_code == 200
+
 		# Send PUT to finish adding scores
 		# Send PUT to try adding scores to a completed game
 
@@ -687,7 +747,9 @@ class ApiTestCase(unittest.TestCase):
 			'start': '01/15/2015 18:11:10',
 			'end': '01/15/2015 18:12:00',
 			'teams': [
-				{ 'players': [
+				{ 
+					'name': 'red',
+					'players': [
 				 	{ 'user_id': user_ids[0],
 				 	  'position': 1, 
 				 	  'scores': [
@@ -712,7 +774,9 @@ class ApiTestCase(unittest.TestCase):
 				 	  	{ 'time': '01/15/2015 18:11:25'}]}
 				 ]
 				},
-				{ 'players': [
+				{ 
+					'name': 'blue',
+					'players': [
 				 	{ 'user_id': user_ids[4],
 				 	  'position': 1,
 				 	  'scores': [
