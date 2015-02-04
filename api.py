@@ -335,6 +335,12 @@ def create_game():
             t = Team()
             g.teams.append(t)
             if 'players' in team:
+                # Get team name 
+                if 'name' in team:
+                    t.name = team['name']
+                else:
+                    make_response('each team must have a name', '400', '')
+
                 # Make sure four players supplied
                 if len(team['players']) != 4:
                     return make_response('must provide 4 players to a team', '400', '')
@@ -451,7 +457,7 @@ def update_game(game_id):
         except ValueError:
             return make_response('date format must be mm/dd/yyyy hh:mm:ss', '400', '')
 
-    if 'end' in g_json:
+    if 'end' in g_json and g_json.get('end') is not None:
         try:
             game.end = datetime.strptime(g_json.get('end'), \
                 '%m/%d/%Y %H:%M:%S')
@@ -466,10 +472,16 @@ def update_game(game_id):
                 if len(game.teams) >= 2:
                     return make_response('game already has two teams', '400', '')
                 t = Team()
+
+                if 'name' in team:
+                    t.name = team['name']
+                else:
+                    make_response('every team must have a name', '400', '')
+
                 game.teams.append(t)
             else:
                 # Retrieve existing team
-                t = db.session.get(Team).filter(Team.id == team.get('id')).first()
+                t = db.session.query(Team).filter(Team.id == team.get('id')).first()
 
                 if t is None:
                     return make_response('team does not exist', '404', '')
@@ -517,7 +529,7 @@ def update_game(game_id):
                         game.players.append(p)
                         t.players.append(p)
                     else:
-                        p = db.session.get(Player).filter(Player.id == player.get('id')).first()
+                        p = db.session.query(Player).filter(Player.id == player.get('id')).first()
 
                         if p is None:
                             return make_response('no player with given id', '404', '')
@@ -544,13 +556,13 @@ def update_game(game_id):
                                 else:
                                     s.time = datetime.now()
 
-                                s.own_goal = sore.get('own_goal', False)
+                                s.own_goal = score.get('own_goal', False)
 
                                 game.scores.append(s)
                                 p.scores.append(s)
                             else:
                                 # Score should already exist...
-                                s = db.session.get(Score).filter(Score.id == score.get('id')).first()
+                                s = db.session.query(Score).filter(Score.id == score.get('id')).first()
 
                                 if s is None:
                                     return make_response('no score with given id', '404', '')
@@ -563,11 +575,12 @@ def update_game(game_id):
 
                                 if s.player_id != p.id:
                                     return make_response('score not with correct player', '400', '')
-    db.session.commit()
-    j = jsonify(game)
-    j.status_code = 200
 
-    return j
+    db.session.commit()
+    resp = jsonify(game.serialize)
+    resp.status_code = 200
+
+    return resp
 
 # Delete a game
 @app.route('/games/<int:game_id>', methods=['DELETE'])
