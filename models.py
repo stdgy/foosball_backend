@@ -28,7 +28,7 @@ class User(db.Model):
 			'first_name': self.first_name,
 			'last_name': self.last_name,
 			'birthday': self.birthday.strftime('%m/%d/%Y') if self.birthday is not None\
-					else '',
+					else None,
 			'email': self.email
 		}
 
@@ -59,20 +59,30 @@ class Game(db.Model):
 				'players': [] 
 			}
 			for player in team.players:
-				t['players'].append({
+				p = {
 					'id': player.id,
 					'position': player.position,
-					'user': player.user.serialize
-				})
+					'user': player.user.serialize,
+					'scores': []
+				}
+				t['players'].append(p)
+				for score in player.scores:
+					p['scores'].append({
+						'id': score.id,
+						'time': score.time.strftime('%m/%d/%Y %H:%M:%S') if score.time is not None\
+							else None,
+						'own_goal': score.own_goal 
+					})
+
 			teams.append(t)
 
 		"""Return full Game object"""
 		return {
 			'id': self.id,
 			'start': self.start.strftime('%m/%d/%Y %H:%M:%S') if self.start is not None\
-					else '',
+					else None,
 			'end': self.end.strftime('%m/%d/%Y %H:%M:%S') if self.end is not None\
-					else '',
+					else None,
 			'teams': teams
 		}
 
@@ -150,7 +160,7 @@ class Score(db.Model):
 		return {
 			'id': self.id,
 			'time': self.time.strftime('%m/%d/%Y %H:%M:%S') if self.time is not None\
-				else '',
+				else None,
 			'own_goal': self.own_goal
 		}
 
