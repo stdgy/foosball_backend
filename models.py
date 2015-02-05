@@ -108,6 +108,7 @@ class Team(db.Model):
 	name = Column(String, nullable=False)
 
 	players = relationship("Player", backref="team")
+	scores = relationship("Score", backref="team")
 
 	@property 
 	def serialize(self):
