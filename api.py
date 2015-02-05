@@ -559,6 +559,7 @@ def update_game(game_id):
                                 s.own_goal = score.get('own_goal', False)
 
                                 game.scores.append(s)
+                                t.scores.append(s)
                                 p.scores.append(s)
                             else:
                                 # Score should already exist...
@@ -579,7 +580,6 @@ def update_game(game_id):
     db.session.commit()
     resp = jsonify(game.serialize)
     resp.status_code = 200
-
     return resp
 
 # Delete a game
