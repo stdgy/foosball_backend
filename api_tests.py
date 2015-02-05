@@ -679,7 +679,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': '02/04/2015 23:33:00',
 			'teams': [
 				{ 
 					'name': 'red',
@@ -711,10 +711,10 @@ class ApiTestCase(unittest.TestCase):
 		game = json.loads(resp.data)
 
 		# Send PUT to update teams
-		# Send PUT to update scores
+		# Send PUT to update score
 		game['teams'][0]['players'][0]['scores'] = [
 			{
-				'time': datetime.now().strftime('%m/%d/%Y %H:%M:%S'),
+				'time': '02/04/2015 23:33:01',
 				'own_goal': False
 			}
 		]
@@ -722,9 +722,58 @@ class ApiTestCase(unittest.TestCase):
 
 		resp = self.app.put('/games/%s' % (game['id']), content_type='application/json',\
 			data=game_json)
+		
 		assert resp.status_code == 200
 
+		game = json.loads(resp.data)
+
 		# Send PUT to finish adding scores
+		game['teams'][0]['players'][0]['scores'].extend([
+			{ 'time': '02/04/2015 23:33:02'},
+			{ 'time': '02/04/2015 23:33:03'}])
+
+		game['teams'][0]['players'][1]['scores'].extend([
+			{ 'time': '02/04/2015 23:33:08'},
+			{ 'time': '02/04/2015 23:33:09'}])
+
+		game['teams'][0]['players'][2]['scores'].extend([
+			{ 'time': '02/04/2015 23:33:10'},
+			{ 'time': '02/04/2015 23:33:11'}])
+
+		game['teams'][0]['players'][3]['scores'].extend([
+			{ 'time': '02/04/2015 23:33:16'},
+			{ 'time': '02/04/2015 23:33:17'},
+			{ 'time': '02/04/2015 23:33:18'}])
+
+		game['teams'][1]['players'][0]['scores'].extend([
+			{ 'time': '02/04/2015 23:33:04'},
+			{ 'time': '02/04/2015 23:33:05'}])
+
+		game['teams'][1]['players'][1]['scores'].extend([
+			{ 'time': '02/04/2015 23:33:06'},
+			{ 'time': '02/04/2015 23:33:07'}])
+
+		game['teams'][1]['players'][2]['scores'].extend([
+			{ 'time': '02/04/2015 23:33:12'},
+			{ 'time': '02/04/2015 23:33:13'}])
+
+		game['teams'][1]['players'][3]['scores'].extend([
+			{ 'time': '02/04/2015 23:33:14'},
+			{ 'time': '02/04/2015 23:33:15'}])
+
+		game_json = json.dumps(game, indent=2)
+
+		#print(game_json)
+
+		resp = self.app.put('/games/%s' % (game['id']), content_type='application/json',\
+			data=game_json)
+		print(resp.status_code)
+		print(resp.data)
+		assert resp.status_code == 200 
+
+		game = json.loads(resp.data)
+		assert game['end'] is not None
+
 		# Send PUT to try adding scores to a completed game
 
 	# Create an entire game with a single game POST.
