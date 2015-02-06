@@ -544,6 +544,10 @@ def update_game(game_id):
                         for score in player.get('scores'):
                             s = None # Score 
                             if 'id' not in score:
+                                # Check that team is allowed to score
+                                if not can_team_score(t):
+                                    return make_response('team cannot score again', '400', '')
+
                                 # Score shouldn't exist. Add it in.
                                 s = Score()
                                 if 'time' in score:
@@ -577,6 +581,10 @@ def update_game(game_id):
                                 if s.player_id != p.id:
                                     return make_response('score not with correct player', '400', '')
 
+    # Check whether game is over after any updates...
+    if game.end is None and is_game_over(game):
+        game.end = datetime.now()
+
     db.session.commit()
     resp = jsonify(game.serialize)
     resp.status_code = 200
@@ -602,6 +610,45 @@ def delete_game(game_id):
 @app.route("/static/<path:path>", methods=['GET'])
 def serve_static(path):
     return app.send_static_file(os.path.join('static', path))
+
+def can_team_score(team):
+    """Check whether a team is allowed to score again"""
+    # Check that team doesn't already have 10 points
+    teams = team.game.teams 
+
+    curr_score = len(filter(lambda x: x.own_goal is False, team.scores))
+
+    if len(teams) == 2:
+        other_team = None
+        if teams[0].id == team.id:
+            other_team = teams[1]
+        else:
+            other_team = teams[0]
+        curr_score += len(filter(lambda x: x.own_goal is True, other_team.scores))
+
+    if curr_score >= 10:
+        return False 
+
+    return True
+
+
+def is_game_over(game):
+    """Check whether a game is over."""
+    # Check if end is set 
+    if game.end is not None:
+        return True 
+
+    # Check whether either team has 10 scores
+    if len(game.teams) == 2:
+        team1_scores = len(filter(lambda x: x.own_goal is False, game.teams[0].scores)) +\
+            len(filter(lambda x: x.own_goal is True, game.teams[1].scores))
+        team2_scores = len(filter(lambda x: x.own_goal is False, game.teams[1].scores)) +\
+            len(filter(lambda x: x.own_goal is True, game.teams[0].scores))
+
+        if team1_scores == 10 or team2_scores == 10:
+            return True 
+
+    return False
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1')
