@@ -722,7 +722,7 @@ class ApiTestCase(unittest.TestCase):
 
 		resp = self.app.put('/games/%s' % (game['id']), content_type='application/json',\
 			data=game_json)
-		
+
 		assert resp.status_code == 200
 
 		game = json.loads(resp.data)
