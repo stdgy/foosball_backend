@@ -763,18 +763,25 @@ class ApiTestCase(unittest.TestCase):
 
 		game_json = json.dumps(game, indent=2)
 
-		#print(game_json)
-
 		resp = self.app.put('/games/%s' % (game['id']), content_type='application/json',\
 			data=game_json)
-		print(resp.status_code)
-		print(resp.data)
 		assert resp.status_code == 200 
 
 		game = json.loads(resp.data)
-		assert game['end'] is not None
+		# Verify game ended
+		#assert game['end'] is not None
 
 		# Send PUT to try adding scores to a completed game
+		game['teams'][0]['players'][0]['scores'].append({
+			'time': '02/04/2015 23:34:00',
+		})
+
+		game_json = json.dumps(game, indent=2)
+
+		resp = self.app.put('/games/%s' % (game['id']), content_type='application/json',\
+			data=game_json)
+		assert resp.status_code == 400 
+		assert resp.data == 'each team can have a max of 10 points'
 
 	# Create an entire game with a single game POST.
 	def test_entire_game(self):
