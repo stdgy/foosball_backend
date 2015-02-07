@@ -56,6 +56,7 @@ class Game(db.Model):
 		for team in self.teams:
 			t = { 
 				'id': team.id,
+				'name': team.name,
 				'players': [] 
 			}
 			for player in team.players:
