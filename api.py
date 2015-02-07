@@ -397,6 +397,7 @@ def create_game():
                                 s.own_goal = False 
 
                             p.scores.append(s)
+                            t.scores.append(s)
                             g.scores.append(s)
 
             else:
@@ -440,153 +441,96 @@ def create_game():
 
 @app.route('/games/<int:game_id>', methods=['PUT'])
 def update_game(game_id):
-    """Updates the game resource through a PUT request"""
-    # Verify game exists
-    game = db.session.query(Game).filter(Game.id == game_id)
+    # Get existing game.
+    g = db.session.query(Game).filter(Game.id == game_id).first()   
 
-    if game.count() == 0:
+    # Get passed in game object 
+    game = request.json 
+
+    if g is None:
         return make_response('game does not exist', '404', '')
 
-    game = game.first()
-    g_json = request.json
-
-    if 'start' in g_json:
+    if game.get('start') is not None:
         try:
-            game.start = datetime.strptime(g_json.get('start'), \
-                '%m/%d/%Y %H:%M:%S')
+            g.start = datetime.strptime(game.get('start'), '%m/%d/%Y %M:%S:%H')
         except ValueError:
-            return make_response('date format must be mm/dd/yyyy hh:mm:ss', '400', '')
+            make_response('times must be in mm/dd/yyyy hh:mi:ss', '400', '')
 
-    if 'end' in g_json and g_json.get('end') is not None:
+    if game.get('end') is not None:
         try:
-            game.end = datetime.strptime(g_json.get('end'), \
-                '%m/%d/%Y %H:%M:%S')
+            g.end = datetime.strptime(game.get('end'), '%m/%d/%Y %M:%S:%H')
         except ValueError:
-            return make_response('date format must be mm/dd/yyyy hh:mm:ss', '400', '')
+            make_response('times must be in mm/dd/yyyy hh:mi:ss', '400', '')
 
-    if 'teams' in g_json:
-        for team in g_json.get('teams'):
-            t = None # team
-            if 'id' not in team:
-                # If ID not supplied, will have to create
-                if len(game.teams) >= 2:
-                    return make_response('game already has two teams', '400', '')
-                t = Team()
+    # Iterate through passed in structures. Update/Add as needed.
+    for team in game['teams']:
+        t = None
+        if team.get('id') is None:
+            # New team.
+            t = Team()
+            g.teams.append(t)
+        else:
+            # Existing team.
+            t = db.session.query(Team).filter(Team.id == team.get('id'))\
+                .filter(Team.game_id == g.id).first()
+            if t is None:
+                return make_response('team does not exist', '404', '')
+        # Set values 
+        t.name = team.get('name')
 
-                if 'name' in team:
-                    t.name = team['name']
-                else:
-                    make_response('every team must have a name', '400', '')
-
-                game.teams.append(t)
+        for player in team['players']:
+            p = None
+            if player.get('id') is None:
+                # New player.
+                p = Player()
+                g.players.append(p)
+                t.players.append(p)
             else:
-                # Retrieve existing team
-                t = db.session.query(Team).filter(Team.id == team.get('id')).first()
+                # Existing player.
+                p = db.session.query(Player).filter(Player.id == player.get('id'))\
+                    .filter(Player.team_id == t.id)\
+                    .filter(Player.game_id == g.id).first()
+                if p is None:
+                    return make_response('player does not exist', '404', '')
+            # Set values
+            p.position = player.get('position')
+            u = player.get('user')
+            if u is None or u.get('id') is None:
+                return make_response('user does not exist', '400', '')
+            p.user_id = u.get('id')
 
-                if t is None:
-                    return make_response('team does not exist', '404', '')
+            for score in player['scores']:
+                s = None
+                if score.get('id') is None:
+                    # New score. 
+                    s = Score()
+                    g.scores.append(s)
+                    t.scores.append(s)
+                    p.scores.append(s)
+                else: 
+                    # Existing score.
+                    s = db.session.query(Score).filter(Score.id == score.get('id'))\
+                        .filter(Score.player_id == p.id)\
+                        .filter(Score.team_id == t.id)\
+                        .filter(Score.game_id == g.id).first()
+                    if s is None:
+                        return make_response('score does not exist', '404', '')
+                # Set values 
+                try:
+                    s.time = datetime.strptime(score.get('time') ,'%m/%d/%Y %H:%M:%S')
+                except ValueError:
+                    make_response('times must be in mm/dd/yyyy hh:mi:ss', '400', '')
+                s.own_goal = score.get('own_goal', False)
 
-                if t.game_id != game.id:
-                    return make_response('team not in game', '400', '')
+    # Verify that resulting game is valid
+    valid_results = validate_game(g)
 
-                # Reached this point, should be good... Team exists and is in the 
-                # game already.
-
-            if 'players' in team:
-                for player in team.get('players'):
-                    p = None # Player
-                    if 'id' not in player:
-                        # player hasn't been created yet.
-                        # run some validation.
-                        if len(t.players) >= 4:
-                            return make_response('team already has four players', '400', '')
-                        p = Player()
-                        p.position = player.get('position')
-
-                        if p.position is None:
-                            return make_response('each player must have a position', '400', '')
-                        else:
-                            # Make sure not already player on team in this posiiton
-                            for x in t.players:
-                                if x.position == p.position:
-                                    return make_response('already player in this position on team',\
-                                        '400', '')
-                        if p.position > 4 or p.position < 1:
-                            return make_response('position must be between 1 and 4 inclusive', \
-                                '400', '')
-
-                        # Get and validate user information
-                        p.user_id = player.get('user_id')
-
-                        if p.user_id is None:
-                            return make_response('every player must reference an existing user',
-                                '400', '')
-
-                        if db.session.query(User).filter(User.id == p.user_id).count() != 1:
-                            return make_response('user id must reference an existing user', \
-                                '400', '')
-
-                        game.players.append(p)
-                        t.players.append(p)
-                    else:
-                        p = db.session.query(Player).filter(Player.id == player.get('id')).first()
-
-                        if p is None:
-                            return make_response('no player with given id', '404', '')
-
-                        if p.game_id != game.id:
-                            return make_response('player not in game', '400', '')
-
-                        if p.team_id != t.id:
-                            return make_response('player not on team', '400', '')
-
-                    if 'scores' in player:
-                        for score in player.get('scores'):
-                            s = None # Score 
-                            if 'id' not in score:
-                                # Check that team is allowed to score
-                                if not can_team_score(t):
-                                    return make_response('team cannot score again', '400', '')
-
-                                # Score shouldn't exist. Add it in.
-                                s = Score()
-                                if 'time' in score:
-                                    try:
-                                        s.time = datetime.strptime(score.get('time'),\
-                                            '%m/%d/%Y %H:%M:%S')
-                                    except ValueError:
-                                        return make_response('date format must be mm/dd/yyyy hh:ss:mi',\
-                                            '400', '')
-                                else:
-                                    s.time = datetime.now()
-
-                                s.own_goal = score.get('own_goal', False)
-
-                                game.scores.append(s)
-                                t.scores.append(s)
-                                p.scores.append(s)
-                            else:
-                                # Score should already exist...
-                                s = db.session.query(Score).filter(Score.id == score.get('id')).first()
-
-                                if s is None:
-                                    return make_response('no score with given id', '404', '')
-
-                                if s.game_id != game.id:
-                                    return make_response('score not in game', '400', '')
-
-                                if s.team_id != t.id:
-                                    return make_response('score not with correct team', '400', '')
-
-                                if s.player_id != p.id:
-                                    return make_response('score not with correct player', '400', '')
-
-    # Check whether game is over after any updates...
-    if game.end is None and is_game_over(game):
-        game.end = datetime.now()
+    # Return game model and success
+    if (valid_results[0] is False):
+        return make_response(valid_results[1], '400', '')
 
     db.session.commit()
-    resp = jsonify(game.serialize)
+    resp = jsonify(g.serialize)
     resp.status_code = 200
     return resp
 
@@ -630,6 +574,49 @@ def can_team_score(team):
         return False 
 
     return True
+
+def validate_game(game):
+    if len(game.teams) > 2:
+        return (False, 'too many teams')
+
+    total_scores = [0, 0]
+
+    for team in game.teams:
+        if len(team.players) > 4:
+            return (False, 'too many players on team')
+
+        if len(filter(lambda x: x.name == team.name, game.teams)) > 1:
+            return (False, 'each team must have a different name')
+
+        # Use this to keep track of the total scores... Kind of stupid and ugly.
+        team_index = game.teams.index(team)
+
+        position_counts = { 1: 0, 2: 0, 3: 0, 4: 0 }
+        for player in team.players:
+            user_count = db.session.query(User).filter(User.id == player.user_id).count()
+            if user_count == 0:
+                return (False, 'user does not exist')
+            if player.position is None or player.position < 1 or player.position > 4:
+                return (False, 'player must be in position 1-4')
+            position_counts[player.position] = position_counts[player.position] + 1 
+
+            for score in player.scores:
+                if score.own_goal is False:
+                    total_scores[team_index] = total_scores[team_index] + 1 
+                else:
+                    total_scores[team_index-1] = total_scores[team_index-1] + 1 
+
+        for key, val in position_counts.iteritems():
+            if val > 1:
+                return (False, 'more than one player in the same position')
+
+    if None in [score.time for score in game.scores]:
+        return (False, 'every score must have a time')
+
+    if total_scores[0] > 10 or total_scores[1] > 10:
+        return (False, 'each team can have a max of 10 points')
+
+    return (True, None)
 
 
 def is_game_over(game):
