@@ -182,24 +182,25 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
-				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[0] },
+				 	  'position': 1,
+				 	  }, 
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[3],
+				 	{ 'user': { 'id': user_ids[3] },
 				 	  'position': 4 } ]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1 },
-				 	{ 'user_id': user_ids[5],
+				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4 }]}
 				 ]
 		})
@@ -222,30 +223,30 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': 1,
+				 	{ 'user': { 'id': 1 },
 				 	  'position': 1 }, 
-				 	{ 'user_id': 2,
+				 	{ 'user': { 'id': 2 },
 				 	  'position': 2 }, 
-				 	{ 'user_id': 3,
+				 	{ 'user': { 'id': 3 },
 				 	  'position': 3 }, 
-				 	{ 'user_id': 4,
+				 	{ 'user': { 'id': 4 },
 				 	  'position': 4 } ]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': 5,
+				 	{ 'user': { 'id': 5 },
 				 	  'position': 1 },
-				 	{ 'user_id': 6,
+				 	{ 'user': { 'id': 6 },
 				 	  'position': 2 },
-				 	{ 'user_id': 7,
+				 	{ 'user': { 'id': 7 },
 				 	  'position': 3 },
-				 	{ 'user_id': 8,
+				 	{ 'user': { 'id': 8 },
 				 	  'position': 4 }]}
 				 ]
 		})
 		resp = self.app.post('/game', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
-		assert resp.data == 'user_id must reference existing user'
+		assert resp.data == 'user does not exist'
 
 		# Add users 
 		user_ids = []
@@ -265,30 +266,30 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[3],
+				 	{ 'user': { 'id': user_ids[3] },
 				 	  'position': 4 } ]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1 },
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4 }]}
 				 ]
 		})
 		resp = self.app.post('/game', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
-		assert resp.data == "the same user can't be on opposing teams"
+		assert resp.data == 'each user can only be on a single team'
 
 	def test_game_bad_position(self):
 		"""Create a game with bad position data"""
@@ -304,36 +305,6 @@ class ApiTestCase(unittest.TestCase):
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
 
-		# Create game with too few positions on a team
-		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
-			'teams': [
-				{ 
-					'name': 'red',
-					'players': [
-				 	{ 'user_id': user_ids[0],
-				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
-				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
-				 	  'position': 3 }]},
-				 { 
-				 	'name': 'blue',
-				 	'players': [
-				 	{ 'user_id': user_ids[4],
-				 	  'position': 1 },
-				 	{ 'user_id': user_ids[5],
-				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
-				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
-				 	  'position': 4 }]}
-				 ]
-		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
-		assert resp.status_code == 400
-		assert resp.data == 'must provide 4 players to a team'
-
 		# Create a game with too many positions on a team
 		game_json = json.dumps({
 			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
@@ -341,32 +312,32 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1 },
-				 	{ 'user_id': user_ids[5],
+				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4 }]}
 				 ]
 		})
 		resp = self.app.post('/game', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
-		assert resp.data == 'must provide 4 players to a team'
+		assert resp.data == 'too many players on team'
 
 		# Create a game with position less than 1
 		game_json = json.dumps({
@@ -375,30 +346,30 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4 }]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 0 },
-				 	{ 'user_id': user_ids[5],
+				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4 }]}
 				 ]
 		})
 		resp = self.app.post('/game', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
-		assert resp.data == 'position must be 1 - 4'
+		assert resp.data == 'player must be in position 1-4'
 
 		# Create a game with position > 4
 		game_json = json.dumps({
@@ -407,30 +378,30 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4 }]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1 },
-				 	{ 'user_id': user_ids[5],
+				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 5 }]}
 				 ]
 		})
 		resp = self.app.post('/game', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
-		assert resp.data == 'position must be 1 - 4'
+		assert resp.data == 'player must be in position 1-4'
 
 	def test_game_bad_teams(self):
 		"""Create games with incorrectly defined teams"""
@@ -445,35 +416,6 @@ class ApiTestCase(unittest.TestCase):
 			assert resp.status_code == 201 
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
-		
-		# Test no teams 
-		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S')
-		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
-		assert resp.status_code == 400
-		assert resp.data == 'must supply teams for a game'
-
-		# Test only single team
-		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
-			'teams': [
-				{ 
-					'name': 'red',
-					'players': [
-				 	{ 'user_id': user_ids[0],
-				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
-				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
-				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[2],
-				 	  'position': 4 }]}
-				 ]
-		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
-		assert resp.status_code == 400
-		assert resp.data == 'must provide two teams for a game'
 
 		# Test three teams 
 		game_json = json.dumps({
@@ -482,41 +424,41 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4 }]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1 },
-				 	{ 'user_id': user_ids[5],
+				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4 }]},
 				 { 
 				 	'name': 'yellow',
 				 	'players': [
-				 	{ 'user_id': user_ids[8],
+				 	{ 'user': { 'id': user_ids[8] },
 				 	  'position': 1 },
-				 	{ 'user_id': user_ids[9],
+				 	{ 'user': { 'id': user_ids[9] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[10],
+				 	{ 'user': { 'id': user_ids[10] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[11],
+				 	{ 'user': { 'id': user_ids[11] },
 				 	  'position': 4 }]}
 				 ]
 		})
 		resp = self.app.post('/game', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
-		assert resp.data == 'must provide two teams for a game'
+		assert resp.data == 'too many teams'
 
 	def test_game_scores(self):
 		"""Send score data to a created game"""
@@ -539,24 +481,24 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4 }]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1 },
-				 	{ 'user_id': user_ids[5],
+				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4 }]}
 				 ]
 		})
@@ -616,24 +558,24 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4 }]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1 },
-				 	{ 'user_id': user_ids[5],
+				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4 }]}
 				 ]
 		})
@@ -684,24 +626,24 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1 }, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3 }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4 }]},
 				 { 
 				 	'name': 'blue',
 				 	'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1 },
-				 	{ 'user_id': user_ids[5],
+				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2 },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3 },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4 }]}
 				 ]
 		})
@@ -806,24 +748,24 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'red',
 					'players': [
-				 	{ 'user_id': user_ids[0],
+				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1, 
 				 	  'scores': [
 				 	   	{ 'time': '01/15/2015 18:11:12'}, 
 				 	   	{ 'time': '01/15/2015 18:11:20'}, 
 				 	   	{ 'time': '01/15/2015 18:11:21',
 				 	   	  'own_goal': True }]}, 
-				 	{ 'user_id': user_ids[1],
+				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2,
 				 	  'scores': [
 				 	  	{ 'time': '01/15/2015 18:11:13'}, 
 				 	  	{ 'time': '01/15/2015 18:11:22'}]}, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3,
 				 	  'scores': [
 				 	  	{ 'time': '01/15/2015 18:11:14'},
 				 	  	{ 'time': '01/15/2015 18:11:23'}] }, 
-				 	{ 'user_id': user_ids[2],
+				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4,
 				 	  'scores': [
 				 	  	{ 'time': '01/15/2015 18:11:24'},
@@ -833,23 +775,23 @@ class ApiTestCase(unittest.TestCase):
 				{ 
 					'name': 'blue',
 					'players': [
-				 	{ 'user_id': user_ids[4],
+				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1,
 				 	  'scores': [
 				 	  	{ 'time': '01/15/2015 18:11:16'}, 
 				 	  	{ 'time': '01/15/2015 18:11:26'}] },
-				 	{ 'user_id': user_ids[5],
+				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2,
 				 	  'scores': [
 				 	  	{ 'time': '01/15/2015 18:11:17'}, 
 				 	  	{ 'time': '01/15/2015 18:11:27'}, 
 				 	  	{ 'time': '01/15/2015 18:11:28'}] },
-				 	{ 'user_id': user_ids[6],
+				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3,
 				 	  'scores': [
 				 	  	{ 'time': '01/15/2015 18:11:18'}, 
 				 	  	{ 'time': '01/15/2015 18:11:29'}] },
-				 	{ 'user_id': user_ids[7],
+				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4,
 				 	  'scores': [
 				 	  	{ 'time': '01/15/2015 18:11:19'}, 
