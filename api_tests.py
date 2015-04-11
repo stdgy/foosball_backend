@@ -177,7 +177,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game 
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.now().isoformat(),
 			'teams': [
 				{ 
 					'name': 'red',
@@ -218,7 +218,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game with nonexistent users
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.now().isoformat(),
 			'teams': [
 				{ 
 					'name': 'red',
@@ -261,7 +261,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game with same user on opposite teams
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.now().isoformat(),
 			'teams': [
 				{ 
 					'name': 'red',
@@ -307,7 +307,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create a game with too many positions on a team
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.now().isoformat(),
 			'teams': [
 				{ 
 					'name': 'red',
@@ -341,7 +341,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create a game with position less than 1
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.now().isoformat(),
 			'teams': [
 				{ 
 					'name': 'red',
@@ -373,7 +373,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create a game with position > 4
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.now().isoformat(),
 			'teams': [
 				{ 
 					'name': 'red',
@@ -419,7 +419,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Test three teams 
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.now().isoformat(),
 			'teams': [
 				{ 
 					'name': 'red',
@@ -476,7 +476,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.now().isoformat(),
 			'teams': [
 				{ 
 					'name': 'red',
@@ -522,7 +522,7 @@ class ApiTestCase(unittest.TestCase):
 		score_json = json.dumps({
 			'player_id': player_id, 
 			'own_goal': False,
-			'time': datetime.now().strftime('%m/%d/%Y %H:%M:%S')
+			'time': datetime.now().isoformat()
 		})
 		resp = self.app.post('/games/%s/score' % (game.get('id')), \
 			content_type='application/json', data=score_json)
@@ -553,7 +553,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Create game
 		game_json = json.dumps({
-			'start': datetime.strftime(datetime.now(), '%m/%d/%Y %H:%M:%S'),
+			'start': datetime.now().isoformat(),
 			'teams': [
 				{ 
 					'name': 'red',
@@ -671,37 +671,37 @@ class ApiTestCase(unittest.TestCase):
 
 		# Send PUT to finish adding scores
 		game['teams'][0]['players'][0]['scores'].extend([
-			{ 'time': '02/04/2015 23:33:02'},
-			{ 'time': '02/04/2015 23:33:03'}])
+			{ 'time': '02/04/2015T23:33:02'},
+			{ 'time': '02/04/2015T23:33:03'}])
 
 		game['teams'][0]['players'][1]['scores'].extend([
-			{ 'time': '02/04/2015 23:33:08'},
-			{ 'time': '02/04/2015 23:33:09'}])
+			{ 'time': '02/04/2015T23:33:08'},
+			{ 'time': '02/04/2015T23:33:09'}])
 
 		game['teams'][0]['players'][2]['scores'].extend([
-			{ 'time': '02/04/2015 23:33:10'},
-			{ 'time': '02/04/2015 23:33:11'}])
+			{ 'time': '02/04/2015T23:33:10'},
+			{ 'time': '02/04/2015T23:33:11'}])
 
 		game['teams'][0]['players'][3]['scores'].extend([
-			{ 'time': '02/04/2015 23:33:16'},
-			{ 'time': '02/04/2015 23:33:17'},
-			{ 'time': '02/04/2015 23:33:18'}])
+			{ 'time': '02/04/2015T23:33:16'},
+			{ 'time': '02/04/2015T23:33:17'},
+			{ 'time': '02/04/2015T23:33:18'}])
 
 		game['teams'][1]['players'][0]['scores'].extend([
-			{ 'time': '02/04/2015 23:33:04'},
-			{ 'time': '02/04/2015 23:33:05'}])
+			{ 'time': '02/04/2015T23:33:04'},
+			{ 'time': '02/04/2015T23:33:05'}])
 
 		game['teams'][1]['players'][1]['scores'].extend([
-			{ 'time': '02/04/2015 23:33:06'},
-			{ 'time': '02/04/2015 23:33:07'}])
+			{ 'time': '02/04/2015T23:33:06'},
+			{ 'time': '02/04/2015T23:33:07'}])
 
 		game['teams'][1]['players'][2]['scores'].extend([
-			{ 'time': '02/04/2015 23:33:12'},
-			{ 'time': '02/04/2015 23:33:13'}])
+			{ 'time': '02/04/2015T23:33:12'},
+			{ 'time': '02/04/2015T23:33:13'}])
 
 		game['teams'][1]['players'][3]['scores'].extend([
-			{ 'time': '02/04/2015 23:33:14'},
-			{ 'time': '02/04/2015 23:33:15'}])
+			{ 'time': '02/04/2015T23:33:14'},
+			{ 'time': '02/04/2015T23:33:15'}])
 
 		game_json = json.dumps(game, indent=2)
 
@@ -751,25 +751,25 @@ class ApiTestCase(unittest.TestCase):
 				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1, 
 				 	  'scores': [
-				 	   	{ 'time': '01/15/2015 18:11:12'}, 
-				 	   	{ 'time': '01/15/2015 18:11:20'}, 
-				 	   	{ 'time': '01/15/2015 18:11:21',
+				 	   	{ 'time': '01/15/2015T18:11:12'}, 
+				 	   	{ 'time': '01/15/2015T18:11:20'}, 
+				 	   	{ 'time': '01/15/2015T18:11:21',
 				 	   	  'own_goal': True }]}, 
 				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015 18:11:13'}, 
-				 	  	{ 'time': '01/15/2015 18:11:22'}]}, 
+				 	  	{ 'time': '01/15/2015T18:11:13'}, 
+				 	  	{ 'time': '01/15/2015T18:11:22'}]}, 
 				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015 18:11:14'},
-				 	  	{ 'time': '01/15/2015 18:11:23'}] }, 
+				 	  	{ 'time': '01/15/2015T18:11:14'},
+				 	  	{ 'time': '01/15/2015T18:11:23'}] }, 
 				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015 18:11:24'},
-				 	  	{ 'time': '01/15/2015 18:11:25'}]}
+				 	  	{ 'time': '01/15/2015T18:11:24'},
+				 	  	{ 'time': '01/15/2015T18:11:25'}]}
 				 ]
 				},
 				{ 
@@ -778,24 +778,24 @@ class ApiTestCase(unittest.TestCase):
 				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015 18:11:16'}, 
-				 	  	{ 'time': '01/15/2015 18:11:26'}] },
+				 	  	{ 'time': '01/15/2015T18:11:16'}, 
+				 	  	{ 'time': '01/15/2015T18:11:26'}] },
 				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015 18:11:17'}, 
-				 	  	{ 'time': '01/15/2015 18:11:27'}, 
-				 	  	{ 'time': '01/15/2015 18:11:28'}] },
+				 	  	{ 'time': '01/15/2015T18:11:17'}, 
+				 	  	{ 'time': '01/15/2015T18:11:27'}, 
+				 	  	{ 'time': '01/15/2015T18:11:28'}] },
 				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015 18:11:18'}, 
-				 	  	{ 'time': '01/15/2015 18:11:29'}] },
+				 	  	{ 'time': '01/15/2015T18:11:18'}, 
+				 	  	{ 'time': '01/15/2015T18:11:29'}] },
 				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015 18:11:19'}, 
-				 	  	{ 'time': '01/15/2015 18:11:30'}] }]}
+				 	  	{ 'time': '01/15/2015T18:11:19'}, 
+				 	  	{ 'time': '01/15/2015T18:11:30'}] }]}
 				 ]
 		})
 		resp = self.app.post('/game', content_type='application/json', data=game_json)
