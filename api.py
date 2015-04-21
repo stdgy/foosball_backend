@@ -308,7 +308,7 @@ def get_teams(game_id):
     return jsonify( teams=results )
 
 # Create a game
-@app.route('/game', methods=['POST'])
+@app.route('/games', methods=['POST'])
 def create_game():
     # Game is sent in as JSON
     game = request.json

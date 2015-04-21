@@ -29,7 +29,7 @@ class ApiTestCase(unittest.TestCase):
 		# Get users
 		resp = self.app.get('/users')
 		users = json.loads(resp.data)
-		assert len(users['users']) == 0
+		assert len(users) == 0
 
 	def test_create_user(self):
 		"""Attempt to create a user"""
@@ -37,10 +37,10 @@ class ApiTestCase(unittest.TestCase):
 			'name': 'danny', 
 			'first_name': 'Danny', 
 			'last_name': 'Boy',
-			'birthday': '03/04/1985',
+			'birthday': '1985-04-03',
 			'email': 'test@fake.com'
 		})
-		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		resp = self.app.post('/users', content_type='application/json', data=user_json)
 		assert resp.status_code == 201
 
 	def test_create_dup_user(self):
@@ -49,13 +49,13 @@ class ApiTestCase(unittest.TestCase):
 			'name': 'danny', 
 			'first_name': 'Danny', 
 			'last_name': 'Boy',
-			'birthday': '03/04/1985',
+			'birthday': '1985-04-03',
 			'email': 'test@fake.com'
 		})
-		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		resp = self.app.post('/users', content_type='application/json', data=user_json)
 		assert resp.status_code == 201
 
-		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		resp = self.app.post('/users', content_type='application/json', data=user_json)
 		assert resp.status_code == 400
 
 	def test_update_user(self):
@@ -65,10 +65,10 @@ class ApiTestCase(unittest.TestCase):
 			'name': 'danny', 
 			'first_name': 'Danny', 
 			'last_name': 'Boy',
-			'birthday': '03/04/1985',
+			'birthday': '1985-04-03',
 			'email': 'test@fake.com'
 		})
-		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		resp = self.app.post('/users', content_type='application/json', data=user_json)
 		assert resp.status_code == 201
 
 		j = json.loads(resp.data)
@@ -77,7 +77,7 @@ class ApiTestCase(unittest.TestCase):
 		j['name'] = 'bobby'
 		j['first_name'] = 'Bob'
 		j['last_name'] = 'Jones'
-		j['birthday'] = '05/26/1988'
+		j['birthday'] = '1988-05-26'
 		j['email'] = 'bob@jones.com'
 
 		resp = self.app.put('/users/%s' % (j['id']), content_type='application/json', data=json.dumps(j))
@@ -91,10 +91,10 @@ class ApiTestCase(unittest.TestCase):
 			'name': 'danny', 
 			'first_name': 'Danny', 
 			'last_name': 'Boy',
-			'birthday': '03/04/1985',
+			'birthday': '1985-04-03',
 			'email': 'test@fake.com'
 		})
-		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		resp = self.app.post('/users', content_type='application/json', data=user_json)
 		assert resp.status_code == 201
 
 		j = json.loads(resp.data)
@@ -109,13 +109,13 @@ class ApiTestCase(unittest.TestCase):
 		user_json = json.dumps({
 			'name': 'user1'
 		})
-		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		resp = self.app.post('/users', content_type='application/json', data=user_json)
 		assert resp.status_code == 201 
 
 		user_json = json.dumps({
 			'name': 'user2'
 		})
-		resp = self.app.post('/user', content_type='application/json', data=user_json)
+		resp = self.app.post('/users', content_type='application/json', data=user_json)
 		assert resp.status_code == 201 
 
 		# Get users 
@@ -124,9 +124,9 @@ class ApiTestCase(unittest.TestCase):
 
 		users = json.loads(resp.data)
 
-		assert len(users['users']) == 2
-		assert users['users'][0]['name'] == 'user1'
-		assert users['users'][1]['name'] == 'user2'
+		assert len(users) == 2
+		assert users[0]['name'] == 'user1'
+		assert users[1]['name'] == 'user2'
 
 	def test_no_games(self):
 		"""Attempt to access game resources where no games exists"""
@@ -170,7 +170,7 @@ class ApiTestCase(unittest.TestCase):
 			user_json = json.dumps({
 				'name': 'user%s' % (i,)
 			})
-			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			resp = self.app.post('/users', content_type='application/json', data=user_json)
 			assert resp.status_code == 201 
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
@@ -204,7 +204,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 201
 
 		game_json = json.loads(resp.data)
@@ -244,7 +244,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
 		assert resp.data == 'user does not exist'
 
@@ -254,7 +254,7 @@ class ApiTestCase(unittest.TestCase):
 			user_json = json.dumps({
 				'name': 'user%s' % (i,)
 			})
-			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			resp = self.app.post('/users', content_type='application/json', data=user_json)
 			assert resp.status_code == 201 
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
@@ -287,7 +287,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
 		assert resp.data == 'each user can only be on a single team'
 
@@ -300,7 +300,7 @@ class ApiTestCase(unittest.TestCase):
 			user_json = json.dumps({
 				'name': 'user%s' % (i,)
 			})
-			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			resp = self.app.post('/users', content_type='application/json', data=user_json)
 			assert resp.status_code == 201 
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
@@ -335,7 +335,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
 		assert resp.data == 'too many players on team'
 
@@ -367,7 +367,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
 		assert resp.data == 'player must be in position 1-4'
 
@@ -399,7 +399,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 5 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
 		assert resp.data == 'player must be in position 1-4'
 
@@ -412,7 +412,7 @@ class ApiTestCase(unittest.TestCase):
 			user_json = json.dumps({
 				'name': 'user%s' % (i,)
 			})
-			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			resp = self.app.post('/users', content_type='application/json', data=user_json)
 			assert resp.status_code == 201 
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
@@ -456,7 +456,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 400
 		assert resp.data == 'too many teams'
 
@@ -469,7 +469,7 @@ class ApiTestCase(unittest.TestCase):
 			user_json = json.dumps({
 				'name': 'user%s' % (i,)
 			})
-			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			resp = self.app.post('/users', content_type='application/json', data=user_json)
 			assert resp.status_code == 201 
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
@@ -502,7 +502,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 201
 
 		game = json.loads(resp.data)
@@ -546,7 +546,7 @@ class ApiTestCase(unittest.TestCase):
 			user_json = json.dumps({
 				'name': 'user%s' % (i,)
 			})
-			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			resp = self.app.post('/users', content_type='application/json', data=user_json)
 			assert resp.status_code == 201 
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
@@ -579,7 +579,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 201
 
 		game = json.loads(resp.data)
@@ -614,14 +614,14 @@ class ApiTestCase(unittest.TestCase):
 			user_json = json.dumps({
 				'name': 'user%s' % (i,)
 			})
-			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			resp = self.app.post('/users', content_type='application/json', data=user_json)
 			assert resp.status_code == 201 
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
 
 		# Create game
 		game_json = json.dumps({
-			'start': '02/04/2015 23:33:00',
+			'start': '2015-04-02 23:33:00',
 			'teams': [
 				{ 
 					'name': 'red',
@@ -647,7 +647,7 @@ class ApiTestCase(unittest.TestCase):
 				 	  'position': 4 }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 201
 
 		game = json.loads(resp.data)
@@ -656,7 +656,7 @@ class ApiTestCase(unittest.TestCase):
 		# Send PUT to update score
 		game['teams'][0]['players'][0]['scores'] = [
 			{
-				'time': '02/04/2015 23:33:01',
+				'time': '2015-04-02 23:33:01',
 				'own_goal': False
 			}
 		]
@@ -671,37 +671,37 @@ class ApiTestCase(unittest.TestCase):
 
 		# Send PUT to finish adding scores
 		game['teams'][0]['players'][0]['scores'].extend([
-			{ 'time': '02/04/2015T23:33:02'},
-			{ 'time': '02/04/2015T23:33:03'}])
+			{ 'time': '2015-04-02T23:33:02'},
+			{ 'time': '2015-04-02T23:33:03'}])
 
 		game['teams'][0]['players'][1]['scores'].extend([
-			{ 'time': '02/04/2015T23:33:08'},
-			{ 'time': '02/04/2015T23:33:09'}])
+			{ 'time': '2015-04-02T23:33:08'},
+			{ 'time': '2015-04-02T23:33:09'}])
 
 		game['teams'][0]['players'][2]['scores'].extend([
-			{ 'time': '02/04/2015T23:33:10'},
-			{ 'time': '02/04/2015T23:33:11'}])
+			{ 'time': '2015-04-02T23:33:10'},
+			{ 'time': '2015-04-02T23:33:11'}])
 
 		game['teams'][0]['players'][3]['scores'].extend([
-			{ 'time': '02/04/2015T23:33:16'},
-			{ 'time': '02/04/2015T23:33:17'},
-			{ 'time': '02/04/2015T23:33:18'}])
+			{ 'time': '2015-04-02T23:33:16'},
+			{ 'time': '2015-04-02T23:33:17'},
+			{ 'time': '2015-04-02T23:33:18'}])
 
 		game['teams'][1]['players'][0]['scores'].extend([
-			{ 'time': '02/04/2015T23:33:04'},
-			{ 'time': '02/04/2015T23:33:05'}])
+			{ 'time': '2015-04-02T23:33:04'},
+			{ 'time': '2015-04-02T23:33:05'}])
 
 		game['teams'][1]['players'][1]['scores'].extend([
-			{ 'time': '02/04/2015T23:33:06'},
-			{ 'time': '02/04/2015T23:33:07'}])
+			{ 'time': '2015-04-02T23:33:06'},
+			{ 'time': '2015-04-02T23:33:07'}])
 
 		game['teams'][1]['players'][2]['scores'].extend([
-			{ 'time': '02/04/2015T23:33:12'},
-			{ 'time': '02/04/2015T23:33:13'}])
+			{ 'time': '2015-04-02T23:33:12'},
+			{ 'time': '2015-04-02T23:33:13'}])
 
 		game['teams'][1]['players'][3]['scores'].extend([
-			{ 'time': '02/04/2015T23:33:14'},
-			{ 'time': '02/04/2015T23:33:15'}])
+			{ 'time': '2015-04-02T23:33:14'},
+			{ 'time': '2015-04-02T23:33:15'}])
 
 		game_json = json.dumps(game, indent=2)
 
@@ -715,7 +715,7 @@ class ApiTestCase(unittest.TestCase):
 
 		# Send PUT to try adding scores to a completed game
 		game['teams'][0]['players'][0]['scores'].append({
-			'time': '02/04/2015 23:34:00',
+			'time': '2015-04-02 23:34:00',
 		})
 
 		game_json = json.dumps(game, indent=2)
@@ -735,15 +735,15 @@ class ApiTestCase(unittest.TestCase):
 			user_json = json.dumps({
 				'name': 'user%s' % (i,)
 			})
-			resp = self.app.post('/user', content_type='application/json', data=user_json)
+			resp = self.app.post('/users', content_type='application/json', data=user_json)
 			assert resp.status_code == 201 
 			u = json.loads(resp.data)
 			user_ids.append(u['id'])
 
 		# Create game
 		game_json = json.dumps({
-			'start': '01/15/2015 18:11:10',
-			'end': '01/15/2015 18:12:00',
+			'start': '2015-05-01 18:11:10',
+			'end': '2015-05-01 18:12:00',
 			'teams': [
 				{ 
 					'name': 'red',
@@ -751,25 +751,25 @@ class ApiTestCase(unittest.TestCase):
 				 	{ 'user': { 'id': user_ids[0] },
 				 	  'position': 1, 
 				 	  'scores': [
-				 	   	{ 'time': '01/15/2015T18:11:12'}, 
-				 	   	{ 'time': '01/15/2015T18:11:20'}, 
-				 	   	{ 'time': '01/15/2015T18:11:21',
+				 	   	{ 'time': '2015-05-01T18:11:12'}, 
+				 	   	{ 'time': '2015-05-01T18:11:20'}, 
+				 	   	{ 'time': '2015-05-01T18:11:21',
 				 	   	  'own_goal': True }]}, 
 				 	{ 'user': { 'id': user_ids[1] },
 				 	  'position': 2,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015T18:11:13'}, 
-				 	  	{ 'time': '01/15/2015T18:11:22'}]}, 
+				 	  	{ 'time': '2015-05-01T18:11:13'}, 
+				 	  	{ 'time': '2015-05-01T18:11:22'}]}, 
 				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 3,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015T18:11:14'},
-				 	  	{ 'time': '01/15/2015T18:11:23'}] }, 
+				 	  	{ 'time': '2015-05-01T18:11:14'},
+				 	  	{ 'time': '2015-05-01T18:11:23'}] }, 
 				 	{ 'user': { 'id': user_ids[2] },
 				 	  'position': 4,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015T18:11:24'},
-				 	  	{ 'time': '01/15/2015T18:11:25'}]}
+				 	  	{ 'time': '2015-05-01T18:11:24'},
+				 	  	{ 'time': '2015-05-01T18:11:25'}]}
 				 ]
 				},
 				{ 
@@ -778,27 +778,27 @@ class ApiTestCase(unittest.TestCase):
 				 	{ 'user': { 'id': user_ids[4] },
 				 	  'position': 1,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015T18:11:16'}, 
-				 	  	{ 'time': '01/15/2015T18:11:26'}] },
+				 	  	{ 'time': '2015-05-01T18:11:16'}, 
+				 	  	{ 'time': '2015-05-01T18:11:26'}] },
 				 	{ 'user': { 'id': user_ids[5] },
 				 	  'position': 2,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015T18:11:17'}, 
-				 	  	{ 'time': '01/15/2015T18:11:27'}, 
-				 	  	{ 'time': '01/15/2015T18:11:28'}] },
+				 	  	{ 'time': '2015-05-01T18:11:17'}, 
+				 	  	{ 'time': '2015-05-01T18:11:27'}, 
+				 	  	{ 'time': '2015-05-01T18:11:28'}] },
 				 	{ 'user': { 'id': user_ids[6] },
 				 	  'position': 3,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015T18:11:18'}, 
-				 	  	{ 'time': '01/15/2015T18:11:29'}] },
+				 	  	{ 'time': '2015-05-01T18:11:18'}, 
+				 	  	{ 'time': '2015-05-01T18:11:29'}] },
 				 	{ 'user': { 'id': user_ids[7] },
 				 	  'position': 4,
 				 	  'scores': [
-				 	  	{ 'time': '01/15/2015T18:11:19'}, 
-				 	  	{ 'time': '01/15/2015T18:11:30'}] }]}
+				 	  	{ 'time': '2015-05-01T18:11:19'}, 
+				 	  	{ 'time': '2015-05-01T18:11:30'}] }]}
 				 ]
 		})
-		resp = self.app.post('/game', content_type='application/json', data=game_json)
+		resp = self.app.post('/games', content_type='application/json', data=game_json)
 		assert resp.status_code == 201
 
 
