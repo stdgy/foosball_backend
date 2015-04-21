@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from datetime.parser import parse
+from dateutil.parser import parse
 from flask import Flask, request, session, g, redirect, url_for, abort, \
         render_template, flash, jsonify, make_response, json
 from models import User, Game, Team, Player, Score
