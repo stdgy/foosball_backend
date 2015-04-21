@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
+from datetime.parser import parse
 from flask import Flask, request, session, g, redirect, url_for, abort, \
-        render_template, flash, jsonify, make_response
+        render_template, flash, jsonify, make_response, json
 from models import User, Game, Team, Player, Score
 from models import db 
 
@@ -45,10 +46,9 @@ def get_games():
     if 'started_after' in request.values:
         after = request.values['started_after']
         try:
-            after = datetime.strptime(after,\
-                    '%m/%d/%Y')
+            after = parse(after)
         except ValueError:
-            return make_response('Bad date format. Should be mm/dd/yyyy.', '400',\
+            return make_response('Bad date format. Should be YYYY-MM-DDThh:mm:ss.', '400',\
                 '')
 
         games = games.filter(Game.start >= after)
@@ -56,10 +56,9 @@ def get_games():
     if 'started_before' in request.values:
         before = request.values['started_before']
         try:
-            before = datetime.strptime(before,\
-                    '%m/%d/%Y')
+            before = parse(before)
         except ValueError:
-            return make_response('Bad date format. Should be mm/dd/yyyy.', '400',\
+            return make_response('Bad date format. Should be YYYY-MM-DDThh:mm:ss.', '400',\
                 '')
 
         games = games.filter(Game.start < before)
@@ -69,9 +68,10 @@ def get_games():
 @app.route('/users', methods=['GET'])
 def get_users():
     users = db.session.query(User)
+    return json.dumps([user.serialize for user in users])
     return jsonify( users=[user.serialize for user in users])
 
-@app.route('/user', methods=['POST'])
+@app.route('/users', methods=['POST'])
 def create_user():
     u_json = request.json 
     u = User()
@@ -93,12 +93,11 @@ def create_user():
     if 'last_name' in u_json:
         u.last_name = u_json['last_name']
 
-    if 'birthday' in u_json:
+    if u_json.get('birthday') is not None:
         try:
-            u.birthday = datetime.strptime(u_json['birthday'],\
-                                '%m/%d/%Y')
+            u.birthday = parse(u_json['birthday'])
         except ValueError:
-            return make_response('birthday must be in format: mm/dd/yyyy', '400',\
+            return make_response('birthday must be in format: YYYY-MM-DDThh:mm:ss', '400',\
                 '')
 
     if 'email' in u_json:
@@ -130,10 +129,9 @@ def put_user(user_id):
     user.last_name = user_json.get('last_name', user.last_name)
     if 'birthday' in user_json:
         try:
-            user.birthday = datetime.strptime(user_json.get('birthday'),\
-                '%m/%d/%Y')
+            user.birthday = parse(user_json.get('birthday'))
         except ValueError:
-            return make_response('birthday must be in form mm/dd/yyyy', '400', '')
+            return make_response('birthday must be in form YYYY-MM-DDThh:mm:ss', '400', '')
     user.email = user_json.get('email', user.email)
 
     db.session.commit()
@@ -249,9 +247,9 @@ def make_score(game_id):
         time = datetime.now()
     else:
         try:
-            time = datetime.strptime(time, '%m/%d/%Y %H:%M:%S')
+            time = parse(time)
         except ValueError:
-            return make_response('time must be encoded mm/dd/yyyy hh:mm:ss',\
+            return make_response('time must be encoded YYYY-MM-DDThh:mm:ss',\
                 '400', '')
 
     # Check own goal. If not sent in, set to false.
@@ -321,16 +319,16 @@ def create_game():
         g.start = datetime.now()
     else:
         try:
-            g.start = datetime.strptime(game['start'], '%m/%d/%Y %H:%M:%S')
+            g.start = parse(game.get('start'))
         except ValueError:
-            return make_response('start must be in format: mm/dd/yyyy hh:mi:ss',\
+            return make_response('times must be in YYYY-MM-DDThh:mm:ss',\
                 '400', '')
 
     if game.get('end') is not None:
         try:
-            g.end = datetime.strptime(game.get('end'), '%m/%d/%Y %M:%S:%H')
+            g.end = parse(game.get('end'))
         except ValueError:
-            make_response('times must be in mm/dd/yyyy hh:mi:ss', '400', '')
+            make_response('times must be in YYYY-MM-DDThh:mm:ss', '400', '')
 
     # Iterate through passed in structures. Update/Add as needed.
     if 'teams' in game:
@@ -366,9 +364,9 @@ def create_game():
                             
                             # Set values 
                             try:
-                                s.time = datetime.strptime(score.get('time') ,'%m/%d/%Y %H:%M:%S')
+                                s.time = parse(score.get('time'))
                             except ValueError:
-                                make_response('times must be in mm/dd/yyyy hh:mi:ss', '400', '')
+                                make_response('times must be in YYYY-MM-DDThh:mm:ss', '400', '')
                             s.own_goal = score.get('own_goal', False)
 
     # Verify that resulting game is valid
@@ -399,15 +397,15 @@ def update_game(game_id):
 
     if game.get('start') is not None:
         try:
-            g.start = datetime.strptime(game.get('start'), '%m/%d/%Y %M:%S:%H')
+            g.start = parse(game.get('start'))
         except ValueError:
-            make_response('times must be in mm/dd/yyyy hh:mi:ss', '400', '')
+            make_response('times must be in YYYY-MM-DDThh:mm:ss', '400', '')
 
     if game.get('end') is not None:
         try:
-            g.end = datetime.strptime(game.get('end'), '%m/%d/%Y %M:%S:%H')
+            g.end = parse(game.get('end'))
         except ValueError:
-            make_response('times must be in mm/dd/yyyy hh:mi:ss', '400', '')
+            make_response('times must be in YYYY-MM-DDThh:mm:ss', '400', '')
 
     # Iterate through passed in structures. Update/Add as needed.
     if 'teams' in game:
@@ -467,9 +465,9 @@ def update_game(game_id):
                                     return make_response('score does not exist', '404', '')
                             # Set values 
                             try:
-                                s.time = datetime.strptime(score.get('time') ,'%m/%d/%Y %H:%M:%S')
+                                s.time = parse(score.get('time'))
                             except ValueError:
-                                make_response('times must be in mm/dd/yyyy hh:mi:ss', '400', '')
+                                make_response('times must be in YYYY-MM-DDThh:mm:ss', '400', '')
                             s.own_goal = score.get('own_goal', False)
 
     # Verify that resulting game is valid
