@@ -34,6 +34,10 @@ def get_games():
     #    user_id -- Games that contain players with user_id
     #    started_before -- Games that started before [time] exclusive
     #    started_after -- Games that started after [time] inclusive
+    #    page -- Page of results to retrieve.
+    #    per_page -- Number of results per page.
+    #    sort_by -- Field to sort by.
+    #    order -- -1: ascending, 1: descending
     if 'user_id' in request.values:
         uid = request.values['user_id']
         try:
