@@ -5,6 +5,8 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
         render_template, flash, jsonify, make_response, json
 from models import User, Game, Team, Player, Score
 from models import db 
+from sqlalchemy import desc
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 # create our application
 app = Flask(__name__)
@@ -24,6 +26,47 @@ def init_db():
     # Create tables 
     db.create_all()
 
+def apply_paging(query, request, Model):
+    sort_keys = [k for k in Model.__dict__ if k[:1] != '_' and \
+        type(Model.__dict__[k]) == InstrumentedAttribute]
+
+    # Set default values
+    page = 1
+    per_page = 50
+    sort_by = sort_keys[0]
+    order = -1
+
+    if 'page' in request.values:
+        try:
+            page = int(request.values['page'])
+        except ValueError:
+            return make_response('page must be an integer.', '400', '')
+
+    if 'per_page' in request.values:
+        try:
+            per_page = int(request.values['per_page'])
+        except ValueError:
+            return make_response('per_page must be an integer > 0', '400', '')
+
+    if 'sort_by' in request.values:
+        if request.values['sort_by'] in sort_keys:
+            sort_by = request.values['sort_by']
+
+    if 'order' in request.values:
+        if request.values['order'] in ['1', '-1']:
+            order = int(request.values['order'])
+        else:
+            return make_response('order must be 1 or -1', '400', '')
+
+    # Apply paging operators to the query
+    if order == 1:
+        query = query.order_by(Model.__dict__[sort_by])
+    else:
+        query = query.order_by(desc(Model.__dict__[sort_by]))
+
+    query = query.slice((page-1) * per_page, page * per_page)
+
+    return query;
 # Routes
 @app.route('/games', methods=['GET'])
 def get_games():
@@ -66,14 +109,18 @@ def get_games():
                 '')
 
         games = games.filter(Game.start < before)
-    
-    return jsonify( games=[game.serialize for game in games])
+
+    games = apply_paging(games, request, Game)
+
+    return json.dumps([game.serialize for game in games])
+    #return jsonify( games=[game.serialize for game in games])
 
 @app.route('/users', methods=['GET'])
 def get_users():
     users = db.session.query(User)
+    users = apply_paging(users, request, User)
     return json.dumps([user.serialize for user in users])
-    return jsonify( users=[user.serialize for user in users])
+    #return jsonify( users=[user.serialize for user in users])
 
 @app.route('/users', methods=['POST'])
 def create_user():

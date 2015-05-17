@@ -25,7 +25,7 @@ class ApiTestCase(unittest.TestCase):
 		# Get games
 		rv = self.app.get('/games')
 		resp = json.loads(rv.data)
-		assert len(resp['games']) == 0
+		assert len(resp) == 0
 		# Get users
 		resp = self.app.get('/users')
 		users = json.loads(resp.data)
