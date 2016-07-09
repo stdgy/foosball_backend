@@ -16,11 +16,35 @@ either a desktop or mobile client. And that's as far as I've planned so far!
 ## Resources
 
 ### User
+- id
+- name
+- first_name
+- last_name
+- birthday
+- email
 
 ### Game
+- id
+- start 
+- end 
 
 ### Team
+- id 
+- game_id
+- name 
 
 ### Player
+- id
+- user_id 
+- game_id 
+- team_id 
+- position 
 
 ### Score
+- id 
+- user_id 
+- game_id 
+- team_id 
+- player_id 
+- time 
+- own_goal
