@@ -7,9 +7,11 @@ from models import User, Game, Team, Player, Score
 from models import db 
 from sqlalchemy import desc
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from flask.ext.cors import CORS
 
 # create our application
 app = Flask(__name__)
+CORS(app)
 
 app.config.update(dict(
     SQLALCHEMY_DATABASE_URI='postgresql+psycopg2://danny@localhost/testdb',
@@ -68,7 +70,8 @@ def apply_paging(query, request, Model):
 
     query = query.slice((page-1) * per_page, page * per_page)
 
-    return query;
+    return query
+    
 # Routes
 @app.route('/games', methods=['GET'])
 def get_games():
@@ -234,7 +237,7 @@ def get_game(game_id):
 
     game = db.session.query(Game).filter(Game.id == game_id).first()
 
-    return jsonify( g.serialize )
+    return jsonify( game.serialize )
 
 @app.route('/games/<int:game_id>/players', methods=['GET'])
 def get_players(game_id):
