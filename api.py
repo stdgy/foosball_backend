@@ -34,29 +34,31 @@ def apply_paging(query, request, Model):
     page = 1
     per_page = 50
     sort_by = sort_keys[0]
-    order = -1
+    order = 1
 
     if 'page' in request.values:
         try:
             page = int(request.values['page'])
         except ValueError:
-            return make_response('page must be an integer.', '400', '')
+            raise ValueError('page must be an integer')
 
     if 'per_page' in request.values:
         try:
             per_page = int(request.values['per_page'])
         except ValueError:
-            return make_response('per_page must be an integer > 0', '400', '')
+            raise ValueError('per_page must be an integer > 0')
 
     if 'sort_by' in request.values:
         if request.values['sort_by'] in sort_keys:
             sort_by = request.values['sort_by']
+        else:
+            raise ValueError('sort_key must be in ' + str(sort_keys))
 
     if 'order' in request.values:
         if request.values['order'] in ['1', '-1']:
             order = int(request.values['order'])
         else:
-            return make_response('order must be 1 or -1', '400', '')
+            raise ValueError('order must be 1 or -1')
 
     # Apply paging operators to the query
     if order == 1:
@@ -110,7 +112,10 @@ def get_games():
 
         games = games.filter(Game.start < before)
 
-    games = apply_paging(games, request, Game)
+    try:
+        games = apply_paging(games, request, Game)
+    except ValueError as e:
+        return make_response(e.args[0], '400', '')
 
     return json.dumps([game.serialize for game in games])
     #return jsonify( games=[game.serialize for game in games])
@@ -118,7 +123,12 @@ def get_games():
 @app.route('/users', methods=['GET'])
 def get_users():
     users = db.session.query(User)
-    users = apply_paging(users, request, User)
+
+    try:
+        users = apply_paging(users, request, User)
+    except ValueError as e:
+        return make_response(e.args[0], '400', '')
+
     return json.dumps([user.serialize for user in users])
     #return jsonify( users=[user.serialize for user in users])
 
